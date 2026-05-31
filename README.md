@@ -62,8 +62,9 @@ Android arm64 Vulkan CI build:
   for the Mali-G715 device; the `linux-vulkan-smoke-binaries` artifact is only
   an Ubuntu x86-64 compile check.
 - Android NDK includes Vulkan C headers but may not include Khronos' C++ wrapper
-  header `vulkan/vulkan.hpp`; the workflow installs `libvulkan-dev` and copies
-  those headers into the NDK sysroot before configuring CMake.
+  header `vulkan/vulkan.hpp` or SPIR-V headers; the workflow installs
+  `libvulkan-dev` and `spirv-headers`, then copies those headers into the NDK
+  sysroot before configuring CMake.
 
 Manual equivalent:
 
