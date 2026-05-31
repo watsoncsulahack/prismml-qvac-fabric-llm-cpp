@@ -1,0 +1,40 @@
+name: Vulkan smoke build
+
+on:
+  push:
+    branches: ["main", "master"]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  linux-vulkan:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential \
+            cmake \
+            ninja-build \
+            glslc \
+            libvulkan-dev \
+            spirv-headers \
+            vulkan-tools
+
+      - name: Configure
+        run: cmake -B build -G Ninja -DGGML_VULKAN=ON -DLLAMA_BUILD_TESTS=OFF
+
+      - name: Build
+        run: cmake --build build --target llama-bench llama-cli -j "$(nproc)"
+
+      - name: Archive binaries
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-vulkan-smoke-binaries
+          path: |
+            build/bin/llama-bench
+            build/bin/llama-cli
