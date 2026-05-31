@@ -55,6 +55,31 @@ cmake -B build -G Ninja -DGGML_VULKAN=ON -DLLAMA_BUILD_TESTS=OFF
 cmake --build build --target llama-bench llama-cli -j "$(nproc)"
 ```
 
+Android arm64 Vulkan CI build:
+
+- The `Vulkan smoke build` workflow also builds an `android-arm64-vulkan-binaries`
+  artifact for native Termux/Android testing. That artifact is the useful one
+  for the Mali-G715 device; the `linux-vulkan-smoke-binaries` artifact is only
+  an Ubuntu x86-64 compile check.
+
+Manual equivalent:
+
+```sh
+cmake -B build-android-arm64-vulkan -G Ninja \
+  -DCMAKE_BUILD_TYPE=Release \
+  -DCMAKE_TOOLCHAIN_FILE="$ANDROID_NDK_ROOT/build/cmake/android.toolchain.cmake" \
+  -DANDROID_ABI=arm64-v8a \
+  -DANDROID_PLATFORM=android-31 \
+  -DANDROID_STL=c++_shared \
+  -DGGML_NATIVE=OFF \
+  -DGGML_CPU_ARM_ARCH=armv8.5-a+fp16+i8mm \
+  -DGGML_VULKAN=ON \
+  -DGGML_OPENMP=OFF \
+  -DLLAMA_CURL=OFF \
+  -DLLAMA_BUILD_TESTS=OFF
+cmake --build build-android-arm64-vulkan --target llama-bench llama-cli -j "$(nproc)"
+```
+
 Native Termux Bonsai smoke test, using the local device GPU:
 
 ```sh
