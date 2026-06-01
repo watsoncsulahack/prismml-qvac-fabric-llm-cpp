@@ -104,25 +104,9 @@ either:
 - a real converter that repacks PrismML `Q2_0` tensors into a QVAC-compatible
   tensor layout.
 
-## Suggested Next Steps
+## Project Notes
 
-1. Fix the GitHub Actions Android build so it reports `int dot: 1` like the
-   native Termux builds. This is mostly about aligning shader compile support
-   and Vulkan feature detection between the NDK artifact and Termux.
-2. Add lightweight Vulkan profiling around Bonsai `Q2_0` matmul paths to split
-   time between unpack/dequant, matmul accumulation, attention/MLP work, and
-   synchronization.
-3. Compare PrismML `Q2_0` Vulkan shaders against QVAC's `TQ2_0` shader patterns,
-   focusing on block layout, thread mapping, fused unpack/dequant/matmul, and
-   subgroup/shared-memory usage.
-4. Decide the long-term base:
-   - keep improving this PrismML fork if the goal is fastest path to Bonsai
-     running correctly;
-   - port PrismML `Q2_0` into QVAC if the goal is a better Android runtime base.
-5. If porting into QVAC, add a distinct internal PrismML tensor type instead of
-   reusing QVAC `TQ2_0`, then implement CPU correctness first, then Vulkan.
-6. Rerun benchmarks with longer warm runs, for example `-p 128 -n 128 -r 3`, so
-   short-run noise is less likely to hide real differences.
+Active follow-up tasks live in [docs/todo.md](docs/todo.md).
 
 ## Build Notes
 

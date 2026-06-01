@@ -56,6 +56,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y \
             cmake \
+            glslang-tools \
             libvulkan-dev \
             ninja-build \
             glslc \
@@ -64,6 +65,7 @@ jobs:
           echo "ANDROID_NDK_ROOT=$ANDROID_HOME/ndk/27.2.12479018" >> "$GITHUB_ENV"
           sudo cp -r /usr/include/vulkan "$ANDROID_HOME/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/"
           sudo cp -r /usr/include/spirv "$ANDROID_HOME/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/"
+          chmod +x ci/glslc-glslang-wrapper.sh
 
       - name: Configure Android arm64 Vulkan
         run: |
@@ -73,6 +75,7 @@ jobs:
             -DANDROID_ABI=arm64-v8a \
             -DANDROID_PLATFORM=android-31 \
             -DANDROID_STL=c++_shared \
+            -DVulkan_GLSLC_EXECUTABLE="$PWD/ci/glslc-glslang-wrapper.sh" \
             -DGGML_NATIVE=OFF \
             -DGGML_CPU_ARM_ARCH=armv8.5-a+fp16+i8mm \
             -DGGML_VULKAN=ON \
