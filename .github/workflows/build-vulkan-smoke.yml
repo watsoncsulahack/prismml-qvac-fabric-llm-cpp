@@ -55,17 +55,27 @@ jobs:
           sdkmanager "ndk;27.2.12479018"
           sudo apt-get update
           sudo apt-get install -y \
+            ca-certificates \
             cmake \
-            glslang-tools \
-            libvulkan-dev \
             ninja-build \
-            glslc \
-            spirv-headers \
+            xz-utils \
             zip
           echo "ANDROID_NDK_ROOT=$ANDROID_HOME/ndk/27.2.12479018" >> "$GITHUB_ENV"
-          sudo cp -r /usr/include/vulkan "$ANDROID_HOME/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/"
-          sudo cp -r /usr/include/spirv "$ANDROID_HOME/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/"
-          chmod +x ci/glslc-glslang-wrapper.sh
+          curl -fsSL \
+            https://sdk.lunarg.com/sdk/download/1.4.350.0/linux/vulkansdk-linux-x86_64-1.4.350.0.tar.xz \
+            -o /tmp/vulkansdk-linux-x86_64-1.4.350.0.tar.xz
+          mkdir -p "$RUNNER_TEMP/vulkan-sdk"
+          tar -xf /tmp/vulkansdk-linux-x86_64-1.4.350.0.tar.xz -C "$RUNNER_TEMP/vulkan-sdk"
+          LUNARG_VULKAN_SDK="$RUNNER_TEMP/vulkan-sdk/1.4.350.0/x86_64"
+          "$LUNARG_VULKAN_SDK/bin/glslc" --version
+          "$LUNARG_VULKAN_SDK/bin/glslc" \
+            -fshader-stage=compute \
+            --target-env=vulkan1.3 \
+            ggml/src/ggml-vulkan/vulkan-shaders/feature-tests/integer_dot.comp \
+            -o /tmp/integer_dot.spv
+          echo "LUNARG_VULKAN_SDK=$LUNARG_VULKAN_SDK" >> "$GITHUB_ENV"
+          sudo cp -r "$LUNARG_VULKAN_SDK/include/vulkan" "$ANDROID_HOME/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/"
+          sudo cp -r "$LUNARG_VULKAN_SDK/include/spirv" "$ANDROID_HOME/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/"
 
       - name: Configure Android arm64 Vulkan
         run: |
@@ -75,7 +85,7 @@ jobs:
             -DANDROID_ABI=arm64-v8a \
             -DANDROID_PLATFORM=android-31 \
             -DANDROID_STL=c++_shared \
-            -DVulkan_GLSLC_EXECUTABLE="$PWD/ci/glslc-glslang-wrapper.sh" \
+            -DVulkan_GLSLC_EXECUTABLE="$LUNARG_VULKAN_SDK/bin/glslc" \
             -DGGML_NATIVE=OFF \
             -DGGML_CPU_ARM_ARCH=armv8.5-a+fp16+i8mm \
             -DGGML_VULKAN=ON \
