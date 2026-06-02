@@ -77,13 +77,22 @@ if grep -q '^[[:space:]]*#include[[:space:]]' "$input"; then
   input="$tmp_input"
 fi
 
+run_glslang() {
+  local output
+
+  if ! output=$(glslangValidator "${args[@]}" --target-env "$target_env" "$input" -o "$1" 2>&1); then
+    printf '%s\n' "$output" >&2
+    return 1
+  fi
+}
+
 if [[ "$out" == "-" ]]; then
   tmp_out="$(mktemp)"
-  glslangValidator "${args[@]}" --target-env "$target_env" "$input" -o "$tmp_out" >/dev/null
+  run_glslang "$tmp_out"
   cat "$tmp_out"
 else
   mkdir -p "$(dirname "$out")"
-  glslangValidator "${args[@]}" --target-env "$target_env" "$input" -o "$out"
+  run_glslang "$out"
 fi
 
 if [[ -n "$depfile" ]]; then
