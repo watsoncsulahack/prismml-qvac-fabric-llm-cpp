@@ -74,8 +74,7 @@ jobs:
             ggml/src/ggml-vulkan/vulkan-shaders/feature-tests/integer_dot.comp \
             -o /tmp/integer_dot.spv
           echo "LUNARG_VULKAN_SDK=$LUNARG_VULKAN_SDK" >> "$GITHUB_ENV"
-          sudo cp -r "$LUNARG_VULKAN_SDK/include/vulkan" "$ANDROID_HOME/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/"
-          sudo cp -r "$LUNARG_VULKAN_SDK/include/spirv" "$ANDROID_HOME/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/"
+          sudo cp -r "$LUNARG_VULKAN_SDK/include/." "$ANDROID_HOME/ndk/27.2.12479018/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/"
 
       - name: Configure Android arm64 Vulkan
         run: |
