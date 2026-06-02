@@ -63,9 +63,11 @@ if [[ "$out" == "-" ]]; then
   glslangValidator "${args[@]}" --target-env "$target_env" "$input" -o "$tmp_out" >/dev/null
   cat "$tmp_out"
 else
+  mkdir -p "$(dirname "$out")"
   glslangValidator "${args[@]}" --target-env "$target_env" "$input" -o "$out"
 fi
 
 if [[ -n "$depfile" ]]; then
+  mkdir -p "$(dirname "$depfile")"
   printf '%s: %s\n' "$out" "$input" > "$depfile"
 fi
