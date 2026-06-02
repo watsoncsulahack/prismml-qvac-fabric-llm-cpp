@@ -7,10 +7,14 @@ target_env="vulkan1.2"
 depfile=
 args=(-V -S comp)
 tmp_out=
+tmp_input=
 
 cleanup() {
   if [[ -n "$tmp_out" && -f "$tmp_out" ]]; then
     rm -f "$tmp_out"
+  fi
+  if [[ -n "$tmp_input" && -f "$tmp_input" ]]; then
+    rm -f "$tmp_input"
   fi
 }
 trap cleanup EXIT
@@ -56,6 +60,21 @@ done
 if [[ -z "$out" || -z "$input" ]]; then
   echo "usage: glslc-glslang-wrapper.sh [glslc-compatible args] shader.comp -o shader.spv" >&2
   exit 2
+fi
+
+if grep -q '^[[:space:]]*#include[[:space:]]' "$input"; then
+  tmp_input="$(mktemp --suffix=.comp)"
+  awk '
+    /^[[:space:]]*#version[[:space:]]/ && !inserted {
+      print
+      print "#extension GL_GOOGLE_include_directive : require"
+      inserted = 1
+      next
+    }
+    { print }
+  ' "$input" > "$tmp_input"
+  args+=("-I$(dirname "$input")")
+  input="$tmp_input"
 fi
 
 if [[ "$out" == "-" ]]; then
