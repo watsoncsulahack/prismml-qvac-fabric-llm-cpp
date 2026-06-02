@@ -46,8 +46,8 @@ Vulkan device: Vulkan0
 Observed Vulkan capability lines vary by binary:
 
 ```text
-Actions PrismML Android artifact:
-Mali-G715 | fp16: 1 | int dot: 0 | matrix cores: KHR_coopmat
+Actions PrismML Android artifact e2a636e+:
+Mali-G715 | fp16: 1 | int dot: 1 | matrix cores: KHR_coopmat
 
 Native Termux PrismML build:
 Mali-G715 | fp16: 1 | int dot: 1 | matrix cores: KHR_coopmat
@@ -56,11 +56,11 @@ Native Termux QVAC build:
 Mali-G715 | fp16: 1 | int dot: 1 | matrix cores: KHR_coopmat
 ```
 
-The `int dot` discrepancy is likely a build/toolchain feature-detection issue:
-the GitHub Actions artifact is cross-built with the Android NDK, while the
-native Termux builds use the Termux Vulkan toolchain/runtime environment. In the
-current Bonsai 4B test, `int dot` changed decode only from `8.61` to `8.93`
-tok/s, so it is real but probably not the main performance limiter.
+Older Actions artifacts built before `e2a636e` reported `int dot: 0` because
+Ubuntu's packaged shader tools did not support `GL_EXT_integer_dot_product`
+during Android cross-build configuration. The Actions workflow now uses the
+LunarG Vulkan SDK shader compiler and fails fast if the integer-dot feature test
+does not compile.
 
 ## Benchmark Table
 
@@ -72,9 +72,11 @@ Unless noted otherwise, benchmarks used:
 
 | Model | Runtime | Build / commit | Device path | int dot | pp tok/s | tg tok/s | rc | Notes |
 | --- | --- | --- | --- | ---: | ---: | ---: | ---: | --- |
+| Bonsai 8B `Q2_0` | PrismML Actions Android artifact | `e2a636e` | Vulkan0 | 1 | 9.52 | 4.54 | 0 | Actions artifact built with LunarG Vulkan SDK `1.4.350.0` |
 | Bonsai 8B `Q2_0` | PrismML Actions Android artifact | `efea4ca` | Vulkan0 | 0 | 10.67 | 5.11 | 0 | Full offload smoke after descriptor-set fix |
 | Bonsai 8B `Q2_0` | PrismML native Termux build | `747eb36` | Vulkan0 | 1 | 2.90 | 5.11 | 0 | Earlier short `p16/n16` full-offload smoke |
 | Bonsai 8B `Q2_0` | PrismML native Termux build | `747eb36` | CPU | n/a | 1.03 | 1.41 | 0 | CPU baseline, `-dev none -ngl 0` |
+| Bonsai 4B `Q2_0` | PrismML Actions Android artifact | `e2a636e` | Vulkan0 | 1 | 18.36 | 7.70 | 0 | Actions artifact built with LunarG Vulkan SDK `1.4.350.0` |
 | Bonsai 4B `Q2_0` | PrismML Actions Android artifact | `efea4ca` | Vulkan0 | 0 | 20.50 | 8.61 | 0 | Downloaded from `prism-ml/Ternary-Bonsai-4B-gguf` |
 | Bonsai 4B `Q2_0` | PrismML native Termux build | `747eb36` | Vulkan0 | 1 | 20.53 | 8.93 | 0 | Same model/device, native Termux binary |
 | Gemma 4 E2B `Q4_K_M` | QVAC native Termux build | `6f541c5` | CPU | n/a | 14.19 | 3.22 | 0 | Prior QVAC CPU baseline |
@@ -83,6 +85,7 @@ Unless noted otherwise, benchmarks used:
 
 Detailed reports:
 
+- [Android arm64 Vulkan int-dot benchmark](reports/actions-android-arm64-vulkan-intdot-bench-2026-06-02.md)
 - [Android arm64 Vulkan smoke test](reports/actions-android-arm64-vulkan-smoke-2026-05-31.md)
 - [Bonsai 4B vs Gemma 4 E4B Vulkan comparison](reports/bonsai4b-gemma4-e4b-vulkan-comparison-2026-05-31.md)
 
