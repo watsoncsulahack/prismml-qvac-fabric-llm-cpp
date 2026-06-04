@@ -72,6 +72,7 @@ Unless noted otherwise, benchmarks used:
 
 | Model | Runtime | Build / commit | Device path | int dot | pp tok/s | tg tok/s | rc | Notes |
 | --- | --- | --- | --- | ---: | ---: | ---: | ---: | --- |
+| Bonsai 1.7B `Q2_0` | PrismML Actions Android artifact | `e2a636e` | Vulkan0 | 1 | 47.70 | 17.92 | 0 | Downloaded from `prism-ml/Ternary-Bonsai-1.7B-gguf`; full offload smoke |
 | Bonsai 8B `Q2_0` | PrismML Actions Android artifact | `e2a636e` | Vulkan0 | 1 | 10.70 | 4.72 | 0 | Most recent Q2_0 smoke, full offload |
 | Bonsai 8B `Q2_0` | PrismML Actions Android artifact | `efea4ca` | Vulkan0 | 0 | 10.67 | 5.11 | 0 | Full offload smoke after descriptor-set fix |
 | Bonsai 8B `Q2_0` | PrismML native Termux build | `747eb36` | Vulkan0 | 1 | 2.90 | 5.11 | 0 | Earlier short `p16/n16` full-offload smoke |
@@ -86,6 +87,7 @@ Unless noted otherwise, benchmarks used:
 Detailed reports:
 
 - [Android arm64 Vulkan int-dot benchmark](reports/actions-android-arm64-vulkan-intdot-bench-2026-06-02.md)
+- [Android arm64 Vulkan Q2_0 Bonsai 1.7B smoke](reports/actions-android-arm64-vulkan-q2-bonsai-1p7b-smoke-2026-06-04.md)
 - [Android arm64 Vulkan Q2_0 Bonsai smoke](reports/actions-android-arm64-vulkan-q2-bonsai-smoke-2026-06-02.md)
 - [Android arm64 Vulkan smoke test](reports/actions-android-arm64-vulkan-smoke-2026-05-31.md)
 - [Bonsai 4B vs Gemma 4 E4B Vulkan comparison](reports/bonsai4b-gemma4-e4b-vulkan-comparison-2026-05-31.md)

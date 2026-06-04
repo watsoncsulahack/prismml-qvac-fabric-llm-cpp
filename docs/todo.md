@@ -44,11 +44,14 @@ Evidence:
   `Mali-G715 | fp16: 1 | int dot: 1 | matrix cores: KHR_coopmat`
 - Bonsai `Q2_0` smoke report:
   [actions-android-arm64-vulkan-q2-bonsai-smoke-2026-06-02.md](../reports/actions-android-arm64-vulkan-q2-bonsai-smoke-2026-06-02.md)
+- Smaller Bonsai `Q2_0` smoke report:
+  [actions-android-arm64-vulkan-q2-bonsai-1p7b-smoke-2026-06-04.md](../reports/actions-android-arm64-vulkan-q2-bonsai-1p7b-smoke-2026-06-04.md)
 
 Most recent smoke results with `-p 64 -n 64 -r 1 -dev Vulkan0 -ngl 99`:
 
 | Model | pp tok/s | tg tok/s | Result |
 | --- | ---: | ---: | --- |
+| Bonsai 1.7B `Q2_0` | 47.70 | 17.92 | pass |
 | Bonsai 4B `Q2_0` | 20.30 | 7.76 | pass |
 | Bonsai 8B `Q2_0` | 10.70 | 4.72 | pass |
 
