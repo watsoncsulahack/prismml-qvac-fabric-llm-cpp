@@ -10,13 +10,9 @@ Android/Vulkan build and runtime work is informed by
 [Tether/QVAC Fabric LLM.cpp](https://github.com/tetherto/qvac-fabric-llm.cpp),
 which has a healthier native Termux Vulkan path on the same device.
 
-The upstream llama.cpp README has intentionally been removed from this fork's
-front page so the repository reflects the current experiment rather than the
-general upstream project.
-
 ## Current Status
 
-The patched PrismML Vulkan path now runs Bonsai models on Android without the
+The patched PrismML Vulkan path now runs Bonsai models on stock Android without the
 previous descriptor-set assertion:
 
 ```text
@@ -34,7 +30,7 @@ The artifact has been copied into native Termux and tested outside PRoot.
 
 ## Test Device
 
-Benchmarks so far were run on Allan's:
+Benchmarks so far were run on:
 
 ```text
 Google Pixel 9 Pro Fold
