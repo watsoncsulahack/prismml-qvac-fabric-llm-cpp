@@ -29,7 +29,7 @@ jobs:
         run: cmake -B build -G Ninja -DGGML_VULKAN=ON -DLLAMA_BUILD_TESTS=OFF
 
       - name: Build
-        run: cmake --build build --target llama-bench llama-cli -j "$(nproc)"
+        run: cmake --build build --target llama-bench llama-cli llama-server -j "$(nproc)"
 
       - name: Archive binaries
         uses: actions/upload-artifact@v4
@@ -38,6 +38,7 @@ jobs:
           path: |
             build/bin/llama-bench
             build/bin/llama-cli
+            build/bin/llama-server
 
   android-arm64-vulkan:
     runs-on: ubuntu-24.04
@@ -93,13 +94,14 @@ jobs:
             -DLLAMA_BUILD_TESTS=OFF
 
       - name: Build Android arm64 Vulkan tools
-        run: cmake --build build-android-arm64-vulkan --target llama-bench llama-cli -j "$(nproc)"
+        run: cmake --build build-android-arm64-vulkan --target llama-bench llama-cli llama-server -j "$(nproc)"
 
       - name: Package Android arm64 Vulkan tools
         run: |
           mkdir -p package/android-arm64-vulkan
           cp build-android-arm64-vulkan/bin/llama-bench package/android-arm64-vulkan/
           cp build-android-arm64-vulkan/bin/llama-cli package/android-arm64-vulkan/
+          cp build-android-arm64-vulkan/bin/llama-server package/android-arm64-vulkan/
           cp build-android-arm64-vulkan/bin/*.so* package/android-arm64-vulkan/ || true
           cp "$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/aarch64-linux-android/libc++_shared.so" package/android-arm64-vulkan/
           (cd package && zip -r android-arm64-vulkan-binaries.zip android-arm64-vulkan)
