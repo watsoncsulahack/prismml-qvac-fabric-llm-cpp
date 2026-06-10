@@ -7,13 +7,11 @@ Artifact source:
 - Repository: `watsoncsulahack/prismml-qvac-fabric-llm-cpp`
 - Build commit: `e2a636e`
 - Actions run: <https://github.com/watsoncsulahack/prismml-qvac-fabric-llm-cpp/actions/runs/26809874917>
-- Local binary directory:
-  `/data/data/com.termux/files/home/openclaw-binaries/prismml-qvac-actions-e2a636e`
+- Binary directory: extracted `android-arm64-vulkan-binaries` artifact
 
-Device:
+Reference runtime:
 
 ```text
-Google Pixel 9 Pro Fold
 GPU: Mali-G715
 Runtime: native Termux
 Vulkan device: Vulkan0
@@ -29,7 +27,7 @@ Command shape:
 
 ```sh
 ./llama-bench \
-  -m /root/.openclaw/workspace/models/prismml/Ternary-Bonsai-4B-Q2_0.gguf \
+  -m /path/to/Ternary-Bonsai-4B-Q2_0.gguf \
   -p 64 -n 64 -r 1 \
   -dev Vulkan0 -ngl 99
 ```
@@ -39,7 +37,7 @@ The 8B smoke used the same arguments with
 
 Results:
 
-| Model | Runtime | Build / commit | Device path | int dot | pp tok/s | tg tok/s | Notes |
+| Model | Runtime | Build / commit | Backend | int dot | pp tok/s | tg tok/s | Notes |
 | --- | --- | --- | --- | ---: | ---: | ---: | --- |
 | Bonsai 4B `Q2_0` | PrismML Actions Android artifact | `e2a636e` | Vulkan0 | 1 | 20.30 | 7.76 | Full offload, no descriptor-set crash |
 | Bonsai 8B `Q2_0` | PrismML Actions Android artifact | `e2a636e` | Vulkan0 | 1 | 10.70 | 4.72 | Full offload, no descriptor-set crash |

@@ -3,7 +3,6 @@
 ## Repository State
 
 - Repository: `watsoncsulahack/prismml-qvac-fabric-llm-cpp`
-- Visibility observed through GitHub API: private
 - Base smoke patch commit: `dead4c5`
 - Android workflow commit: `efea4ca`
 - Successful workflow run: `26706235299`
@@ -29,11 +28,7 @@ The Android job needed host-side Khronos headers copied into the NDK sysroot:
 
 ## Native Termux Test
 
-Artifact extracted to:
-
-```text
-/data/data/com.termux/files/home/openclaw-binaries/prismml-qvac-actions-efea4ca
-```
+The Android artifact was extracted and run from a native Termux directory.
 
 The binary is an Android aarch64 executable:
 
@@ -59,7 +54,7 @@ Available devices:
 Model:
 
 ```text
-/data/data/com.termux/files/usr/var/lib/proot-distro/installed-rootfs/ubuntu/root/.openclaw/workspace/models/prismml/Ternary-Bonsai-8B-Q2_0.gguf
+/path/to/Ternary-Bonsai-8B-Q2_0.gguf
 ```
 
 Short smoke test, `-p 16 -n 16 -r 1`:

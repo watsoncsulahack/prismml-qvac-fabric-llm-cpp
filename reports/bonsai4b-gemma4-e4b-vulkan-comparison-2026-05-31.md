@@ -15,12 +15,12 @@ Follow-up to the Android arm64 Vulkan Actions build. The main questions were:
 
 - Bonsai 4B: `Ternary-Bonsai-4B-Q2_0.gguf`
   - Source: `https://huggingface.co/prism-ml/Ternary-Bonsai-4B-gguf`
-  - Local path: `/root/.openclaw/workspace/models/prismml/Ternary-Bonsai-4B-Q2_0.gguf`
+  - Model path: local GGUF checkout
   - Size reported by `llama-bench`: `1019.50 MiB`
   - Params reported by `llama-bench`: `4.02 B`
 - Gemma 4 E4B Q4_K_M:
   - Source: `https://huggingface.co/mradermacher/gemma-4-E4B-GGUF`
-  - Local path: `/data/data/com.termux/files/home/qvac/gemma-4-E4B.Q4_K_M.gguf`
+  - Model path: local GGUF checkout
   - Size reported by `llama-bench`: `4.95 GiB`
   - Params reported by `llama-bench`: `7.52 B`
 
@@ -96,4 +96,3 @@ Bonsai 4B looks much better than Bonsai 8B on the patched PrismML Vulkan path:
 - Bonsai 4B: `tg64 8.61-8.93 tok/s`
 
 That makes the Bonsai result less mysterious: the 8B model was slow because it is still a large model and its Q2_0 path is not an especially magical 1-bit GPU path. The 4B model is materially faster, but not because the GPU is doing pure ternary math for free. The runtime still has to unpack packed codes, apply scales, multiply against activations, accumulate, and coordinate GPU workgroups.
-

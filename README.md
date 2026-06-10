@@ -1,14 +1,14 @@
 # prismml-qvac-fabric-llm-cpp
 
-Private experimental fork for making PrismML Ternary-Bonsai GGUF models run
-reliably with Vulkan acceleration on Android.
+Android-focused llama.cpp fork for running PrismML Ternary-Bonsai GGUF models
+with Vulkan acceleration.
 
 This fork started from the
 [PrismML llama.cpp fork](https://github.com/PrismML-Eng/llama.cpp), because that
 tree already knows how to load PrismML Bonsai `Q1_0` / `Q2_0` tensors. The
 Android/Vulkan build and runtime work is informed by
 [Tether/QVAC Fabric LLM.cpp](https://github.com/tetherto/qvac-fabric-llm.cpp),
-which has a healthier native Termux Vulkan path on the same device.
+which has a healthier native Termux Vulkan path on Android ARM64 devices.
 
 ## Current Status
 
@@ -28,12 +28,11 @@ GitHub Actions now produces an Android arm64 Vulkan artifact containing:
 
 The artifact has been copied into native Termux and tested outside PRoot.
 
-## Test Device
+## Reference Android Runtime
 
-Benchmarks so far were run on:
+Benchmarks so far were run on an Android ARM64 device with this runtime profile:
 
 ```text
-Google Pixel 9 Pro Fold
 GPU: Mali-G715
 Runtime: native Termux via com.termux.RUN_COMMAND
 Vulkan device: Vulkan0
@@ -66,7 +65,7 @@ Unless noted otherwise, benchmarks used:
 -p 64 -n 64 -r 1 -dev Vulkan0 -ngl 99
 ```
 
-| Model | Runtime | Build / commit | Device path | int dot | pp tok/s | tg tok/s | rc | Notes |
+| Model | Runtime | Build / commit | Backend | int dot | pp tok/s | tg tok/s | rc | Notes |
 | --- | --- | --- | --- | ---: | ---: | ---: | ---: | --- |
 | Bonsai 1.7B `Q2_0` | PrismML Actions Android artifact | `e2a636e` | Vulkan0 | 1 | 47.70 | 17.92 | 0 | Downloaded from `prism-ml/Ternary-Bonsai-1.7B-gguf`; full offload smoke |
 | Bonsai 8B `Q2_0` | PrismML Actions Android artifact | `e2a636e` | Vulkan0 | 1 | 10.70 | 4.72 | 0 | Most recent Q2_0 smoke, full offload |
@@ -87,6 +86,7 @@ Detailed reports:
 - [Android arm64 Vulkan Q2_0 Bonsai smoke](reports/actions-android-arm64-vulkan-q2-bonsai-smoke-2026-06-02.md)
 - [Android arm64 Vulkan smoke test](reports/actions-android-arm64-vulkan-smoke-2026-05-31.md)
 - [Bonsai 4B vs Gemma 4 E4B Vulkan comparison](reports/bonsai4b-gemma4-e4b-vulkan-comparison-2026-05-31.md)
+- [Gemma 4 12B Android Vulkan server flag benchmark](reports/gemma4-12b-android-vulkan-server-flags-2026-06-10.md)
 
 ## Compatibility Notes
 
