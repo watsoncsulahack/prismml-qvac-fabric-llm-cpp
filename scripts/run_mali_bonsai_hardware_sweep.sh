@@ -3,19 +3,19 @@ set -u
 
 BIN_DIR="${BIN_DIR:-/data/data/com.termux/files/home/android-arm64-vulkan}"
 MODEL="${MODEL:-/data/data/com.termux/files/home/Ternary-Bonsai-1.7B-Q2_0.gguf}"
-OUT_DIR="${OUT_DIR:-/data/data/com.termux/files/home/benchmarks/mali-bonsai-hardware-spread-$(date -u +%Y%m%dT%H%M%SZ)}"
+OUT_DIR="${OUT_DIR:-/data/data/com.termux/files/home/benchmarks/mali-bonsai-hardware-sweep-$(date -u +%Y%m%dT%H%M%SZ)}"
 
 PROMPT_TOKENS="${PROMPT_TOKENS:-128}"
 GEN_TOKENS="${GEN_TOKENS:-128}"
 REPEAT="${REPEAT:-2}"
 BATCH_SIZE="${BATCH_SIZE:-256}"
 UBATCH_SIZE="${UBATCH_SIZE:-64}"
-BATCH_UBATCH_SPREAD="${BATCH_UBATCH_SPREAD:-}"
+BATCH_UBATCH_SWEEP="${BATCH_UBATCH_SWEEP:-}"
 FLASH_ATTN="${FLASH_ATTN:-0}"
 PROMPT_CHARS="${PROMPT_CHARS:-0}"
 MODEL_TOKEN_BYTES="${MODEL_TOKEN_BYTES:-0}"
-SPREAD_THREADS="${SPREAD_THREADS:-2}"
-SPREAD_NGL="${SPREAD_NGL:-99}"
+SWEEP_THREADS="${SWEEP_THREADS:-2}"
+SWEEP_NGL="${SWEEP_NGL:-99}"
 
 THREADS_LIST="${THREADS_LIST:-1 2 4 6 8}"
 NGL_LIST="${NGL_LIST:-0 1 8 16 99}"
@@ -34,12 +34,12 @@ export LD_LIBRARY_PATH="$BIN_DIR${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
   printf 'repeat=%s\n' "$REPEAT"
   printf 'batch_size=%s\n' "$BATCH_SIZE"
   printf 'ubatch_size=%s\n' "$UBATCH_SIZE"
-  printf 'batch_ubatch_spread=%s\n' "$BATCH_UBATCH_SPREAD"
+  printf 'batch_ubatch_sweep=%s\n' "$BATCH_UBATCH_SWEEP"
   printf 'flash_attn=%s\n' "$FLASH_ATTN"
   printf 'prompt_chars=%s\n' "$PROMPT_CHARS"
   printf 'model_token_bytes=%s\n' "$MODEL_TOKEN_BYTES"
-  printf 'spread_threads=%s\n' "$SPREAD_THREADS"
-  printf 'spread_ngl=%s\n' "$SPREAD_NGL"
+  printf 'sweep_threads=%s\n' "$SWEEP_THREADS"
+  printf 'sweep_ngl=%s\n' "$SWEEP_NGL"
   printf 'threads_list=%s\n' "$THREADS_LIST"
   printf 'ngl_list=%s\n' "$NGL_LIST"
   printf 'uname=%s\n' "$(uname -a)"
@@ -114,11 +114,11 @@ run_one() {
     "$phase" "$threads" "$threads_batch" "$ngl" "$dev" "$prompt" "$gen" "$total_tokens" "$prompt_chars" "$model_token_bytes" "$repeat" "$batch" "$ubatch" "$fa" "$rc" "$seconds" "$out" >> "$summary"
 }
 
-if [ -n "$BATCH_UBATCH_SPREAD" ]; then
-  for pair in $BATCH_UBATCH_SPREAD; do
+if [ -n "$BATCH_UBATCH_SWEEP" ]; then
+  for pair in $BATCH_UBATCH_SWEEP; do
     batch="${pair%%:*}"
     ubatch="${pair#*:}"
-    run_one spread "$SPREAD_THREADS" "$SPREAD_THREADS" "$SPREAD_NGL" Vulkan0 "$PROMPT_TOKENS" "$GEN_TOKENS" "$REPEAT" "$batch" "$ubatch" "$FLASH_ATTN" "$PROMPT_CHARS" "$MODEL_TOKEN_BYTES"
+    run_one sweep "$SWEEP_THREADS" "$SWEEP_THREADS" "$SWEEP_NGL" Vulkan0 "$PROMPT_TOKENS" "$GEN_TOKENS" "$REPEAT" "$batch" "$ubatch" "$FLASH_ATTN" "$PROMPT_CHARS" "$MODEL_TOKEN_BYTES"
   done
 else
   for ngl in $NGL_LIST; do

@@ -1,10 +1,10 @@
-# Mali-G715 Bonsai Hardware Spread
+# Mali-G715 Bonsai Hardware Sweep
 
 Date: 2026-06-13
 
 ## Summary
 
-This benchmark is a hardware-profile spread for `Ternary-Bonsai-1.7B-Q2_0.gguf` on the native Android/Termux Vulkan path. The goal was not to find a reasonable profile, but to identify the profile supported by quantitative evidence from the phone running the software.
+This benchmark is a hardware-profile sweep for `Ternary-Bonsai-1.7B-Q2_0.gguf` on the native Android/Termux Vulkan path. The goal was not to find a reasonable profile, but to identify the profile supported by quantitative evidence from the phone running the software.
 
 Hardware path:
 
@@ -21,8 +21,8 @@ Headline:
 - Full GPU offload, `-ngl 99`, was the correct placement for this Bonsai workload in the tested shapes.
 - CPU-only decode improved with more threads up to `-t 6`, but still lost to full GPU offload.
 - Partial offload, tested at `-ngl 1` and `-ngl 8`, was worse than both CPU-only and full GPU offload for decode.
-- For full GPU offload, `-t 2` was the best thread setting in the short decode-focused spread.
-- In the prompt/batch spread at `-ngl 99 -t 2`, `-b 512 -ub 64` had the fastest prompt processing and shortest wall-clock run. `-b 512 -ub 32` had the fastest decode row in that batch spread.
+- For full GPU offload, `-t 2` was the best thread setting in the short decode-focused sweep.
+- In the prompt/batch sweep at `-ngl 99 -t 2`, `-b 512 -ub 64` had the fastest prompt processing and shortest wall-clock run. `-b 512 -ub 32` had the fastest decode row in that batch sweep.
 
 ## Runtime Proof
 
@@ -42,7 +42,7 @@ Raw local artifacts:
 /data/data/com.termux/files/home/benchmarks/mali-bonsai-hardware-sweep-20260612T224200Z/
 ```
 
-Spread script:
+Sweep script:
 
 ```text
 scripts/run_mali_bonsai_hardware_sweep.sh
@@ -50,7 +50,7 @@ scripts/run_mali_bonsai_hardware_sweep.sh
 
 ## Command Shapes
 
-The decode-focused spread used:
+The decode-focused sweep used:
 
 ```sh
 llama-bench \
@@ -65,7 +65,7 @@ llama-bench \
   -o json
 ```
 
-The batch/microbatch spread used:
+The batch/microbatch sweep used:
 
 ```sh
 llama-bench \
@@ -141,7 +141,7 @@ Command shape: `-dev Vulkan0 -ngl 99 -b 256 -ub 64 -fa 0 -p 64 -n 64 -r 1`.
 
 Finding:
 
-`-ngl 99 -t 2` is the best row in this decode-focused spread. It beats the best CPU-only decode row by about 81% (`9.84` vs `5.45` TG tok/s), and has the best wall-clock time.
+`-ngl 99 -t 2` is the best row in this decode-focused sweep. It beats the best CPU-only decode row by about 81% (`9.84` vs `5.45` TG tok/s), and has the best wall-clock time.
 
 ## Batch and Microbatch Results
 
@@ -167,7 +167,7 @@ Finding:
 
 `-ub 128` is consistently poor on this phone-class Vulkan path. It should not be the default microbatch for Bonsai.
 
-## Confirmation Spread Results
+## Confirmation Sweep Results
 
 Date: 2026-06-14
 
@@ -176,7 +176,7 @@ Command shape: `-dev Vulkan0 -ngl 99 -t 2 -fa 0 -p 512 -n 32 -r 3`.
 Raw local artifacts:
 
 ```text
-/data/data/com.termux/files/home/benchmarks/mali-bonsai-hardware-spread-20260614T050159Z/
+/data/data/com.termux/files/home/benchmarks/mali-bonsai-hardware-sweep-20260614T050159Z/
 ```
 
 | Batch | Microbatch | Prompt tokens | Gen tokens | Total tokens | Prompt chars | Model token bytes | PP tok/s | TG tok/s | Wall time |
@@ -188,7 +188,7 @@ Raw local artifacts:
 
 Finding:
 
-In this repeated confirmation spread, `-ub 64` is the better microbatch shape for this prompt-heavy row. Both `128/64` and `256/64` roughly doubled prompt-processing throughput versus `-ub 32`, while token-generation throughput stayed effectively tied around 16 tok/s. `128/64` has the best wall-clock time by a narrow margin, and `256/64` is close enough that either is defensible; keep `256/64` as the conservative continuity setting unless later server TTFT rows prefer `128/64`.
+In this repeated confirmation sweep, `-ub 64` is the better microbatch shape for this prompt-heavy row. Both `128/64` and `256/64` roughly doubled prompt-processing throughput versus `-ub 32`, while token-generation throughput stayed effectively tied around 16 tok/s. `128/64` has the best wall-clock time by a narrow margin, and `256/64` is close enough that either is defensible; keep `256/64` as the conservative continuity setting unless later server TTFT rows prefer `128/64`.
 
 ## Current Evidence-backed Profile
 
@@ -198,7 +198,7 @@ For Bonsai 1.7B Q2_0 on this Mali-G715 path, the stable parts of the measured pr
 -ngl 99 -t 2 -fa 0 -ub 64
 ```
 
-For broad synthetic prompt processing, `-b 512 -ub 64` remains the strongest row from the earlier spread. For the confirmation subset Allan requested, `-b 128 -ub 64` and `-b 256 -ub 64` are effectively tied, with `128/64` slightly ahead on wall-clock.
+For broad synthetic prompt processing, `-b 512 -ub 64` remains the strongest row from the earlier sweep. For the confirmation subset, `-b 128 -ub 64` and `-b 256 -ub 64` are effectively tied, with `128/64` slightly ahead on wall-clock.
 
 For `llama-server`, keep prompt-cache behavior separate from hardware throughput testing. The earlier server behavior showed `--cache-ram 0` giving more consistent repeated short requests, so server-level validation should test both:
 
@@ -223,8 +223,8 @@ The correct delegation model for this project is therefore not "GPU for prefill,
 
 ## Caveats
 
-- The original broad spread used one repetition and no warmup.
-- The 2026-06-14 confirmation spread used three repetitions, but still no warmup.
+- The original broad sweep used one repetition and no warmup.
+- The 2026-06-14 confirmation sweep used three repetitions, but still no warmup.
 - Rows were run sequentially, so thermal state may influence later rows.
 - `llama-bench` isolates model throughput; it does not include HTTP server overhead, prompt-cache behavior, slot reuse, or Pi agent tool-loop behavior.
 - This benchmark covers Bonsai 1.7B Q2_0 only. Gemma or larger models may have a different optimum.

@@ -55,16 +55,15 @@ Most recent smoke results with `-p 64 -n 64 -r 1 -dev Vulkan0 -ngl 99`:
 | Bonsai 4B `Q2_0` | 20.30 | 7.76 | pass |
 | Bonsai 8B `Q2_0` | 10.70 | 4.72 | pass |
 
-### 1.1. Quantify Gemma 4 E2B batch/microbatch spread
+### 1.1. Quantify Gemma 4 E2B batch/microbatch sweep
 
-Gemma 4 E2B Q4_K_M was benchmarked after Allan's qualitative Pi-session
-assessment showed the new batch settings felt much better than the Bonsai
-model.
+Gemma 4 E2B Q4_K_M was benchmarked after qualitative Pi-session assessment
+showed the new batch settings felt much better than the Bonsai model.
 
 Evidence:
 
 - Report:
-  [mali-g715-gemma4-e2b-q4km-batch-spread-2026-06-14.md](benchmarks/mali-g715-gemma4-e2b-q4km-batch-spread-2026-06-14.md)
+  [mali-g715-gemma4-e2b-q4km-batch-sweep-2026-06-14.md](benchmarks/mali-g715-gemma4-e2b-q4km-batch-sweep-2026-06-14.md)
 - Best measured row: `-ngl 99 -t 2 -fa 0 -b 512 -ub 64`
 - Result: `32.41` PP tok/s, `7.93` TG tok/s, `65s` wall time
 - Interpretation: for Gemma 4 E2B, `512/64` is the current best interactive
@@ -83,14 +82,14 @@ Evidence:
 
 ### Current local model paths
 
-Allan moved larger models under top-level Termux `~/models`:
+Larger models are stored under top-level Termux `~/models`:
 
 ```text
 /data/data/com.termux/files/home/models/gemma-4-12b-it-qat-q4_0.gguf
 /data/data/com.termux/files/home/models/LFM2-8B-A1B-Q4_0.gguf
 ```
 
-Finish Bonsai spread validation before moving to the LFM2 8B A1B MoE benchmark.
+Finish Bonsai sweep validation before moving to the LFM2 8B A1B MoE benchmark.
 
 ### 2. Build lightweight Vulkan profiling for Bonsai `Q2_0`
 

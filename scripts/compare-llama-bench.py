@@ -1017,7 +1017,7 @@ if known_args.plot:
             cols = 1 if num_groups == 1 else min(max_cols, num_groups)
             rows = ceil(num_groups / cols)
 
-            # Scale figure size by grid dimensions
+            # Scale figure size by subplot layout dimensions.
             w, h = base_size
             fig, ax_arr = plt.subplots(rows, cols,
                                        figsize=(w * cols, h * rows),

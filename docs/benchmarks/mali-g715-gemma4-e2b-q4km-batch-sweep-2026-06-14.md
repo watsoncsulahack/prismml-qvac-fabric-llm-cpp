@@ -1,16 +1,16 @@
-# Mali-G715 Gemma 4 E2B Q4_K_M Batch Spread
+# Mali-G715 Gemma 4 E2B Q4_K_M Batch Sweep
 
 Date: 2026-06-14
 
 ## Summary
 
-This benchmark measures the same batch/microbatch spread that improved the
+This benchmark measures the same batch/microbatch sweep that improved the
 interactive Pi session, but on `gemma-4-E2B-it-Q4_K_M.gguf` instead of the
 Ternary-Bonsai 1.7B model.
 
-The qualitative result Allan reported matches the quantitative result: `-ub 64`
+The qualitative interactive result matches the quantitative result: `-ub 64`
 is the important change, and `-b 512 -ub 64` is the strongest row measured so
-far in this Gemma 4 E2B spread.
+far in this Gemma 4 E2B sweep.
 
 ## Runtime Proof
 
@@ -59,23 +59,23 @@ With f16 KV, the simple per-token KV annotation is:
 Raw local artifacts:
 
 ```text
-/data/data/com.termux/files/home/benchmarks/mali-gemma4-e2b-q4km-hardware-spread-20260614T072048Z/
-/data/data/com.termux/files/home/benchmarks/mali-gemma4-e2b-q4km-hardware-spread-512-20260614T074717Z/
+/data/data/com.termux/files/home/benchmarks/mali-gemma4-e2b-q4km-hardware-sweep-20260614T072048Z/
+/data/data/com.termux/files/home/benchmarks/mali-gemma4-e2b-q4km-hardware-sweep-512-20260614T074717Z/
 /data/data/com.termux/files/home/benchmarks/mali-gemma4-e2b-q4km-targeted-20260614T075314Z/
 ```
 
 ## Command Shape
 
-The spread used:
+The sweep used:
 
 ```sh
 MODEL=/data/data/com.termux/files/home/qvac/gemma-4-E2B-it-Q4_K_M.gguf \
-BATCH_UBATCH_SPREAD="128:32 128:64 256:32 256:64" \
+BATCH_UBATCH_SWEEP="128:32 128:64 256:32 256:64" \
 PROMPT_TOKENS=512 \
 GEN_TOKENS=32 \
 REPEAT=3 \
-SPREAD_THREADS=2 \
-SPREAD_NGL=99 \
+SWEEP_THREADS=2 \
+SWEEP_NGL=99 \
 FLASH_ATTN=0 \
 MODEL_TOKEN_BYTES=71680 \
 scripts/run_mali_bonsai_hardware_sweep.sh
@@ -203,7 +203,7 @@ leave cache behavior at the default so repeated-prefix behavior can help.
 
 - The `prompt_chars` column is `0` because this was a synthetic `llama-bench`
   token-count benchmark, not a real prompt-text benchmark.
-- The spread was sequential and used no warmup, so thermal state may still
+- The sweep was sequential and used no warmup, so thermal state may still
   influence later rows.
 - The Ternary-Bonsai `128/64` and `256/64` result should not be reused for
   Gemma. In this Gemma run, `512/64` is materially better.
