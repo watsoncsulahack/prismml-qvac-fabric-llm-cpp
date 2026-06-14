@@ -80,11 +80,24 @@ Evidence:
 
 ## Active Focus
 
-### 1.2. Publishable Gemma 4 E2B tuning dataset
+### 1.2. Publishable Gemma 4 E2B agent tuning dataset
 
 The next benchmark plan is captured in:
 
-[mali-g715-gemma4-e2b-q4km-next-sweeps-2026-06-14.md](benchmarks/mali-g715-gemma4-e2b-q4km-next-sweeps-2026-06-14.md)
+[mali-g715-gemma4-e2b-agent-sweeps-2026-06-14.md](benchmarks/mali-g715-gemma4-e2b-agent-sweeps-2026-06-14.md)
+
+Primary model:
+
+```text
+/data/data/com.termux/files/home/models/gemma-4-E2B-it-qat-UD-Q4_K_XL.gguf
+```
+
+Comparison models:
+
+```text
+/data/data/com.termux/files/home/qvac/gemma-4-E2B-it-Q4_K_M.gguf
+/data/data/com.termux/files/home/Ternary-Bonsai-1.7B-Q2_0.gguf
+```
 
 Minimum dataset before publishing:
 
@@ -92,8 +105,12 @@ Minimum dataset before publishing:
 - larger-batch sweep: `512/64`, `768/64`, `1024/64`;
 - microbatch-near-64 sweep: `512/48`, `512/64`, `512/80`, `512/96`;
 - server-session sweep with short, medium, long, and follow-up generations;
-- thermal and power-state notes for every run;
+- the same rows across the three-model set where practical;
+- raw performance numbers first, with thermal and power-state notes collected
+  opportunistically;
 - prompt/tool-overhead comparison;
+- PrismML versus QVAC/Fabric runtime comparison when the QVAC int-dot artifact
+  is available;
 - final recommended profile and conservative fallback profile.
 
 ### Current local model paths
@@ -102,6 +119,7 @@ Larger models are stored under top-level Termux `~/models`:
 
 ```text
 /data/data/com.termux/files/home/models/gemma-4-12b-it-qat-q4_0.gguf
+/data/data/com.termux/files/home/models/gemma-4-E2B-it-qat-UD-Q4_K_XL.gguf
 /data/data/com.termux/files/home/models/LFM2-8B-A1B-Q4_0.gguf
 ```
 

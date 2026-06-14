@@ -1,11 +1,24 @@
-# Mali-G715 Gemma 4 E2B Q4_K_M Next Sweeps
+# Mali-G715 Gemma 4 E2B Agent Sweeps
 
 Date: 2026-06-14
 
 ## Purpose
 
-This plan defines the next measurements for `gemma-4-E2B-it-Q4_K_M.gguf` on
-the Pixel 9 Pro Fold / Tensor G4 / Mali-G715 Vulkan path.
+This plan defines the next measurements for Gemma 4 E2B and Bonsai agent
+workflows on the Pixel 9 Pro Fold / Tensor G4 / Mali-G715 Vulkan path.
+
+The primary model for the next sweeps is:
+
+```text
+/data/data/com.termux/files/home/models/gemma-4-E2B-it-qat-UD-Q4_K_XL.gguf
+```
+
+Comparison models:
+
+```text
+/data/data/com.termux/files/home/qvac/gemma-4-E2B-it-Q4_K_M.gguf
+/data/data/com.termux/files/home/Ternary-Bonsai-1.7B-Q2_0.gguf
+```
 
 The current best measured synthetic profile is:
 
@@ -13,10 +26,10 @@ The current best measured synthetic profile is:
 -dev Vulkan0 -ngl 99 -t 2 -fa 0 -b 512 -ub 64
 ```
 
-The next goal is to find a practical long-session agent profile, not just the
-fastest isolated `llama-bench` row. The target is 15 tok/s if possible, and 20
-tok/s if the hardware/runtime path can support it without destroying agent
-quality.
+The next goal is to find a practical long-session agent profile for the primary
+`UD-Q4_K_XL` model, then compare it against the Q4_K_M Gemma candidate and the
+Bonsai baseline. The target is 15 tok/s if possible, and 20 tok/s if the
+hardware/runtime path can support it without destroying agent quality.
 
 ## Why This Data Is Useful
 
@@ -28,7 +41,9 @@ This benchmark series is useful if it preserves those details. It can become a
 reference for:
 
 - Mali-G715 Vulkan behavior on a real phone-class SoC;
-- Gemma 4 E2B `Q4_K_M` viability for local agent workflows;
+- Gemma 4 E2B `UD-Q4_K_XL` viability for local agent workflows;
+- how the primary Gemma model compares with the Q4_K_M Gemma candidate and
+  Bonsai 1.7B `Q2_0`;
 - batch and microbatch tuning on unified-memory mobile GPUs;
 - long-session context and KV-cache tradeoffs;
 - differences between synthetic `llama-bench` throughput and interactive
@@ -43,7 +58,7 @@ starts.
 Use this as the control row unless the sweep explicitly changes it:
 
 ```text
-model=/data/data/com.termux/files/home/qvac/gemma-4-E2B-it-Q4_K_M.gguf
+model=/data/data/com.termux/files/home/models/gemma-4-E2B-it-qat-UD-Q4_K_XL.gguf
 backend=Vulkan
 device=Vulkan0
 ngl=99
@@ -67,7 +82,21 @@ Record these for every sweep:
 - batch, microbatch, threads, GPU layers, flash attention, KV type;
 - wall time, prompt-processing tok/s, token-generation tok/s;
 - battery level, charging state, screen state, and device temperature if
-  available.
+  available. These are secondary for now; raw performance rows come first.
+
+## Model Set
+
+Run each planned sweep against these models unless a row fails to load or
+exceeds practical runtime:
+
+| Role | Model | Path |
+| --- | --- | --- |
+| Primary | Gemma 4 E2B `UD-Q4_K_XL` | `/data/data/com.termux/files/home/models/gemma-4-E2B-it-qat-UD-Q4_K_XL.gguf` |
+| Comparison | Gemma 4 E2B `Q4_K_M` | `/data/data/com.termux/files/home/qvac/gemma-4-E2B-it-Q4_K_M.gguf` |
+| Baseline | Ternary-Bonsai 1.7B `Q2_0` | `/data/data/com.termux/files/home/Ternary-Bonsai-1.7B-Q2_0.gguf` |
+
+Keep `-t 2` for all of these sweeps. Thread count is not part of the next
+measurement round.
 
 ## Sweep 1: Context Length
 
@@ -189,8 +218,11 @@ Publishable result:
 
 ## Sweep 5: KV Cache Type
 
-Question: can KV quantization reduce memory pressure without damaging quality
-or failing context creation?
+Question: can q8 KV reduce memory pressure without damaging quality or failing
+context creation?
+
+This is a KV-cache representation sweep, not a model-quant-variant sweep. The
+model set stays fixed to the three listed files.
 
 Current evidence:
 
@@ -212,38 +244,14 @@ Publishable result:
 - whether q8 improves long-context stability or speed;
 - whether failures are model-specific, runtime-specific, or option-specific.
 
-## Sweep 6: Thread Count And CPU Contention
-
-Question: does `-t 2` remain best once context length and server behavior are
-included?
-
-Already measured in the synthetic 512/64 row:
-
-```text
-t1/fa0: slower
-t2/fa0: best measured
-t4/fa0: slower
-```
-
-Repeat only for the best context row:
-
-```text
--t 1
--t 2
--t 3
--t 4
-```
-
-Publishable result:
-
-- whether a phone-class SoC wants low CPU helper-thread count for Vulkan;
-- whether thread count affects long-session stability differently than short
-  synthetic throughput.
-
-## Sweep 7: Thermal And Power State
+## Sweep 6: Thermal And Power State
 
 Question: how much of the throughput curve is hardware throttling rather than
 runtime tuning?
+
+This is secondary for the immediate round. Collect thermal/power notes when
+easy, but do not block raw performance collection on perfect thermal
+instrumentation.
 
 Run the same baseline in controlled states:
 
@@ -268,30 +276,7 @@ Publishable result:
 - sustained tok/s, not just burst tok/s;
 - recommended benchmark discipline for phone-class local LLM testing.
 
-## Sweep 8: Quant Variant Comparison
-
-Question: is `Q4_K_M` the best quality/speed point, or merely the best tested
-agent-quality point?
-
-Candidate models:
-
-```text
-Gemma 4 E2B Q4_K_M
-Gemma 4 E2B Q4_0, if available
-Gemma 4 E2B Q4_K_S, if available
-Gemma 4 E2B Q5*, if memory allows
-```
-
-Keep prompt, context, batch, microbatch, and runtime fixed.
-
-Publishable result:
-
-- quality/speed tradeoff across quant formats;
-- whether `Q4_K_M` is worth its speed cost;
-- whether a smaller/faster quant gets closer to 15-20 tok/s while staying
-  useful for agent work.
-
-## Sweep 9: Prompt And Tooling Overhead
+## Sweep 7: Prompt And Tooling Overhead
 
 Question: how much performance is being lost to prompt bulk rather than model
 speed?
@@ -321,7 +306,7 @@ Publishable result:
 - whether rolling summaries are more effective than increasing `-c`;
 - a practical prompt-budget recommendation.
 
-## Sweep 10: Runtime Comparison
+## Sweep 8: Runtime Comparison
 
 Question: does the QVAC/Fabric fork become competitive once it has an Android
 Vulkan artifact with integer-dot shader support?
@@ -334,7 +319,8 @@ QVAC/Fabric Android Vulkan artifact from PR #151 or local equivalent
 newer upstream llama.cpp/PrismML artifact if available
 ```
 
-Use the same Gemma 4 E2B model and best-known context/batch profile.
+Use the same primary Gemma 4 E2B `UD-Q4_K_XL` model and best-known
+context/batch profile.
 
 Publishable result:
 
@@ -350,9 +336,12 @@ Before raising awareness, collect at least:
 2. Batch sweep: `512/64`, `768/64`, `1024/64`.
 3. Microbatch sweep: `512/48`, `512/64`, `512/80`, `512/96`.
 4. Server-session sweep: short, medium, long, and follow-up generations.
-5. Thermal notes for every run.
+5. The same rows across the primary Gemma `UD-Q4_K_XL`, Gemma `Q4_K_M`, and
+   Bonsai `Q2_0` model set where practical.
 6. One prompt/tool-overhead comparison.
-7. One clear recommended profile and one conservative fallback profile.
+7. One PrismML versus QVAC/Fabric runtime comparison when the QVAC int-dot
+   artifact is available.
+8. One clear recommended profile and one conservative fallback profile.
 
 ## Current Hypothesis
 
@@ -369,7 +358,26 @@ shorter prompt/tool context with rolling summaries
 ```
 
 The 15-20 tok/s goal may require more than parameter tuning. It may need a
-faster quant, a newer Vulkan backend, better shader paths, or tighter agent
-prompt discipline. The strongest near-term win is likely reducing prompt and
-long-session context load while preserving enough memory through summaries and
-retrieval.
+newer Vulkan backend, better shader paths, or tighter agent prompt discipline.
+The strongest near-term win is likely reducing prompt and long-session context
+load while preserving enough memory through summaries and retrieval.
+
+## F16 Versus Q8 KV
+
+`f16` stores each KV-cache number as a 16-bit floating-point value. It uses more
+memory, but it is the safer quality baseline and the path already known to work
+for these rows.
+
+`q8` stores each KV-cache number in an 8-bit quantized representation plus
+scale metadata. It usually cuts KV memory roughly in half, which can help
+longer contexts or reduce memory pressure. The tradeoff is possible quality
+loss, extra quantize/dequantize overhead, and implementation-specific support
+issues. That is why q8 KV should be tested as a targeted follow-up against f16,
+not assumed to be faster.
+
+In short:
+
+```text
+f16 KV = larger cache, safer baseline, usually lower risk.
+q8 KV  = smaller cache, possible memory win, must be tested for quality/speed.
+```
