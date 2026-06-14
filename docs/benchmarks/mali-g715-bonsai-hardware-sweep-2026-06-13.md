@@ -1,10 +1,10 @@
-# Mali-G715 Bonsai Hardware Sweep
+# Mali-G715 Bonsai Hardware Spread
 
 Date: 2026-06-13
 
 ## Summary
 
-This benchmark is a hardware-profile sweep for `Ternary-Bonsai-1.7B-Q2_0.gguf` on the native Android/Termux Vulkan path. The goal was not to find a reasonable profile, but to identify the profile supported by quantitative evidence from the phone running the software.
+This benchmark is a hardware-profile spread for `Ternary-Bonsai-1.7B-Q2_0.gguf` on the native Android/Termux Vulkan path. The goal was not to find a reasonable profile, but to identify the profile supported by quantitative evidence from the phone running the software.
 
 Hardware path:
 
@@ -21,8 +21,8 @@ Headline:
 - Full GPU offload, `-ngl 99`, was the correct placement for this Bonsai workload in the tested shapes.
 - CPU-only decode improved with more threads up to `-t 6`, but still lost to full GPU offload.
 - Partial offload, tested at `-ngl 1` and `-ngl 8`, was worse than both CPU-only and full GPU offload for decode.
-- For full GPU offload, `-t 2` was the best thread setting in the short decode-focused sweep.
-- In the prompt/batch sweep at `-ngl 99 -t 2`, `-b 512 -ub 64` had the fastest prompt processing and shortest wall-clock run. `-b 512 -ub 32` had the fastest decode row in that batch sweep.
+- For full GPU offload, `-t 2` was the best thread setting in the short decode-focused spread.
+- In the prompt/batch spread at `-ngl 99 -t 2`, `-b 512 -ub 64` had the fastest prompt processing and shortest wall-clock run. `-b 512 -ub 32` had the fastest decode row in that batch spread.
 
 ## Runtime Proof
 
@@ -42,7 +42,7 @@ Raw local artifacts:
 /data/data/com.termux/files/home/benchmarks/mali-bonsai-hardware-sweep-20260612T224200Z/
 ```
 
-Sweep script:
+Spread script:
 
 ```text
 scripts/run_mali_bonsai_hardware_sweep.sh
@@ -50,7 +50,7 @@ scripts/run_mali_bonsai_hardware_sweep.sh
 
 ## Command Shapes
 
-The decode-focused sweep used:
+The decode-focused spread used:
 
 ```sh
 llama-bench \
@@ -65,7 +65,7 @@ llama-bench \
   -o json
 ```
 
-The batch/microbatch sweep used:
+The batch/microbatch spread used:
 
 ```sh
 llama-bench \
@@ -80,6 +80,16 @@ llama-bench \
   --no-warmup \
   -o json
 ```
+
+## Result Columns
+
+The chart columns should keep size context visible:
+
+- `Prompt tokens`: `llama-bench -p`; synthetic prompt token count for benchmark rows.
+- `Gen tokens`: `llama-bench -n`; generated token count.
+- `Total tokens`: prompt plus generated tokens for a quick row-size comparison.
+- `Prompt chars`: source prompt character count when testing a real prompt; `0` means the row used synthetic `llama-bench -p` tokens.
+- `Model token bytes`: per-token model-side byte size being annotated for the run, such as KV bytes per token, when known; `0` means not annotated.
 
 ## Decode and Placement Results
 
@@ -131,25 +141,25 @@ Command shape: `-dev Vulkan0 -ngl 99 -b 256 -ub 64 -fa 0 -p 64 -n 64 -r 1`.
 
 Finding:
 
-`-ngl 99 -t 2` is the best row in this decode-focused sweep. It beats the best CPU-only decode row by about 81% (`9.84` vs `5.45` TG tok/s), and has the best wall-clock time.
+`-ngl 99 -t 2` is the best row in this decode-focused spread. It beats the best CPU-only decode row by about 81% (`9.84` vs `5.45` TG tok/s), and has the best wall-clock time.
 
 ## Batch and Microbatch Results
 
 Command shape: `-dev Vulkan0 -ngl 99 -t 2 -fa 0 -p 512 -n 32 -r 1`.
 
-| Batch | Microbatch | PP tok/s | TG tok/s | Wall time |
-| ---: | ---: | ---: | ---: | ---: |
-| 64 | 32 | 13.26 | 9.71 | 171s |
-| 64 | 64 | 19.05 | 6.85 | 191s |
-| 128 | 32 | 12.70 | 6.57 | 240s |
-| 128 | 64 | 21.70 | 7.33 | 173s |
-| 128 | 128 | 7.47 | 7.18 | 291s |
-| 256 | 32 | 14.19 | 8.67 | 159s |
-| 256 | 64 | 18.21 | 8.58 | 188s |
-| 256 | 128 | 7.57 | 6.61 | 263s |
-| 512 | 32 | 13.53 | 11.02 | 166s |
-| 512 | 64 | 23.52 | 7.38 | 141s |
-| 512 | 128 | 7.37 | 7.27 | 378s |
+| Batch | Microbatch | Prompt tokens | Gen tokens | Total tokens | Prompt chars | Model token bytes | PP tok/s | TG tok/s | Wall time |
+| ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| 64 | 32 | 512 | 32 | 544 | 0 | 114688 | 13.26 | 9.71 | 171s |
+| 64 | 64 | 512 | 32 | 544 | 0 | 114688 | 19.05 | 6.85 | 191s |
+| 128 | 32 | 512 | 32 | 544 | 0 | 114688 | 12.70 | 6.57 | 240s |
+| 128 | 64 | 512 | 32 | 544 | 0 | 114688 | 21.70 | 7.33 | 173s |
+| 128 | 128 | 512 | 32 | 544 | 0 | 114688 | 7.47 | 7.18 | 291s |
+| 256 | 32 | 512 | 32 | 544 | 0 | 114688 | 14.19 | 8.67 | 159s |
+| 256 | 64 | 512 | 32 | 544 | 0 | 114688 | 18.21 | 8.58 | 188s |
+| 256 | 128 | 512 | 32 | 544 | 0 | 114688 | 7.57 | 6.61 | 263s |
+| 512 | 32 | 512 | 32 | 544 | 0 | 114688 | 13.53 | 11.02 | 166s |
+| 512 | 64 | 512 | 32 | 544 | 0 | 114688 | 23.52 | 7.38 | 141s |
+| 512 | 128 | 512 | 32 | 544 | 0 | 114688 | 7.37 | 7.27 | 378s |
 
 Finding:
 
@@ -157,13 +167,38 @@ Finding:
 
 `-ub 128` is consistently poor on this phone-class Vulkan path. It should not be the default microbatch for Bonsai.
 
+## Confirmation Spread Results
+
+Date: 2026-06-14
+
+Command shape: `-dev Vulkan0 -ngl 99 -t 2 -fa 0 -p 512 -n 32 -r 3`.
+
+Raw local artifacts:
+
+```text
+/data/data/com.termux/files/home/benchmarks/mali-bonsai-hardware-spread-20260614T050159Z/
+```
+
+| Batch | Microbatch | Prompt tokens | Gen tokens | Total tokens | Prompt chars | Model token bytes | PP tok/s | TG tok/s | Wall time |
+| ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| 128 | 32 | 512 | 32 | 544 | 0 | 114688 | 22.17 | 16.07 | 77s |
+| 128 | 64 | 512 | 32 | 544 | 0 | 114688 | 43.60 | 16.18 | 43s |
+| 256 | 32 | 512 | 32 | 544 | 0 | 114688 | 22.23 | 16.08 | 77s |
+| 256 | 64 | 512 | 32 | 544 | 0 | 114688 | 43.15 | 16.00 | 44s |
+
+Finding:
+
+In this repeated confirmation spread, `-ub 64` is the better microbatch shape for this prompt-heavy row. Both `128/64` and `256/64` roughly doubled prompt-processing throughput versus `-ub 32`, while token-generation throughput stayed effectively tied around 16 tok/s. `128/64` has the best wall-clock time by a narrow margin, and `256/64` is close enough that either is defensible; keep `256/64` as the conservative continuity setting unless later server TTFT rows prefer `128/64`.
+
 ## Current Evidence-backed Profile
 
-For Bonsai 1.7B Q2_0 on this Mali-G715 path, the current measured profile is:
+For Bonsai 1.7B Q2_0 on this Mali-G715 path, the stable parts of the measured profile are:
 
 ```sh
--ngl 99 -t 2 -fa 0 -b 512 -ub 64
+-ngl 99 -t 2 -fa 0 -ub 64
 ```
+
+For broad synthetic prompt processing, `-b 512 -ub 64` remains the strongest row from the earlier spread. For the confirmation subset Allan requested, `-b 128 -ub 64` and `-b 256 -ub 64` are effectively tied, with `128/64` slightly ahead on wall-clock.
 
 For `llama-server`, keep prompt-cache behavior separate from hardware throughput testing. The earlier server behavior showed `--cache-ram 0` giving more consistent repeated short requests, so server-level validation should test both:
 
@@ -188,24 +223,38 @@ The correct delegation model for this project is therefore not "GPU for prefill,
 
 ## Caveats
 
-- One repetition, no warmup.
+- The original broad spread used one repetition and no warmup.
+- The 2026-06-14 confirmation spread used three repetitions, but still no warmup.
 - Rows were run sequentially, so thermal state may influence later rows.
 - `llama-bench` isolates model throughput; it does not include HTTP server overhead, prompt-cache behavior, slot reuse, or Pi agent tool-loop behavior.
-- The batch/microbatch winner should be confirmed with repeated top-candidate runs before treating it as final.
 - This benchmark covers Bonsai 1.7B Q2_0 only. Gemma or larger models may have a different optimum.
 
 ## Next Step
 
-Run a confirmation pass with the top candidates:
+Move to `llama-server` TTFT testing with the Pi agent prompt shape, and compare the ubatch-64 candidates in the actual server path:
 
 ```sh
-# decode-confirm
-llama-bench -m MODEL.gguf -dev Vulkan0 -ngl 99 -t 2 -p 64 -n 128 -r 3 -b 512 -ub 64 -fa 0 --no-warmup -o json
-llama-bench -m MODEL.gguf -dev Vulkan0 -ngl 99 -t 8 -p 64 -n 128 -r 3 -b 512 -ub 32 -fa 0 --no-warmup -o json
-
-# prompt-confirm
-llama-bench -m MODEL.gguf -dev Vulkan0 -ngl 99 -t 2 -p 512 -n 32 -r 3 -b 512 -ub 64 -fa 0 --no-warmup -o json
-llama-bench -m MODEL.gguf -dev Vulkan0 -ngl 99 -t 2 -p 512 -n 32 -r 3 -b 512 -ub 32 -fa 0 --no-warmup -o json
+-b 128 -ub 64
+-b 256 -ub 64
+-b 512 -ub 64
 ```
 
-After that, move to `llama-server` TTFT testing with the Pi agent prompt shape.
+Also measure cache behavior separately. Android/Termux did not expose the usual Linux CPU cache metadata in this run, so use a fallback ladder:
+
+```sh
+# CPU cache metadata, if the kernel exposes it
+for d in /sys/devices/system/cpu/cpu0/cache/index*; do
+  echo "$d"
+  for f in level type size coherency_line_size ways_of_associativity number_of_sets; do
+    [ -r "$d/$f" ] && printf '  %s=' "$f" && cat "$d/$f"
+  done
+done
+
+# Device-tree cache hints, if readable
+find /proc/device-tree -iname '*cache*' -o -iname '*l2*' 2>/dev/null
+
+# Vulkan-visible limits; this usually will not reveal L2 size directly
+vulkaninfo 2>/dev/null | grep -iE 'cache|memory|subgroup|timestamp|shared'
+```
+
+If those paths stay blank, use an empirical cache-size probe: run a small GPU or CPU memory-access microbenchmark across buffer sizes from 128 KiB to 8 MiB and look for the bandwidth/latency knee. That will not name the vendor's exact L2 configuration, but it gives the working-set limit that matters for batch/microbatch tuning.

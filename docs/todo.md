@@ -57,6 +57,17 @@ Most recent smoke results with `-p 64 -n 64 -r 1 -dev Vulkan0 -ngl 99`:
 
 ## Active Focus
 
+### Current local model paths
+
+Allan moved larger models under top-level Termux `~/models`:
+
+```text
+/data/data/com.termux/files/home/models/gemma-4-12b-it-qat-q4_0.gguf
+/data/data/com.termux/files/home/models/LFM2-8B-A1B-Q4_0.gguf
+```
+
+Finish Bonsai spread validation before moving to the LFM2 8B A1B MoE benchmark.
+
 ### 2. Build lightweight Vulkan profiling for Bonsai `Q2_0`
 
 Question to answer: where does Bonsai `Q2_0` time go on Mali-G715?

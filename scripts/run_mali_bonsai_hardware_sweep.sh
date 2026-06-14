@@ -3,14 +3,19 @@ set -u
 
 BIN_DIR="${BIN_DIR:-/data/data/com.termux/files/home/android-arm64-vulkan}"
 MODEL="${MODEL:-/data/data/com.termux/files/home/Ternary-Bonsai-1.7B-Q2_0.gguf}"
-OUT_DIR="${OUT_DIR:-/data/data/com.termux/files/home/benchmarks/mali-bonsai-hardware-sweep-$(date -u +%Y%m%dT%H%M%SZ)}"
+OUT_DIR="${OUT_DIR:-/data/data/com.termux/files/home/benchmarks/mali-bonsai-hardware-spread-$(date -u +%Y%m%dT%H%M%SZ)}"
 
 PROMPT_TOKENS="${PROMPT_TOKENS:-128}"
 GEN_TOKENS="${GEN_TOKENS:-128}"
 REPEAT="${REPEAT:-2}"
 BATCH_SIZE="${BATCH_SIZE:-256}"
 UBATCH_SIZE="${UBATCH_SIZE:-64}"
+BATCH_UBATCH_SPREAD="${BATCH_UBATCH_SPREAD:-}"
 FLASH_ATTN="${FLASH_ATTN:-0}"
+PROMPT_CHARS="${PROMPT_CHARS:-0}"
+MODEL_TOKEN_BYTES="${MODEL_TOKEN_BYTES:-0}"
+SPREAD_THREADS="${SPREAD_THREADS:-2}"
+SPREAD_NGL="${SPREAD_NGL:-99}"
 
 THREADS_LIST="${THREADS_LIST:-1 2 4 6 8}"
 NGL_LIST="${NGL_LIST:-0 1 8 16 99}"
@@ -29,7 +34,12 @@ export LD_LIBRARY_PATH="$BIN_DIR${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
   printf 'repeat=%s\n' "$REPEAT"
   printf 'batch_size=%s\n' "$BATCH_SIZE"
   printf 'ubatch_size=%s\n' "$UBATCH_SIZE"
+  printf 'batch_ubatch_spread=%s\n' "$BATCH_UBATCH_SPREAD"
   printf 'flash_attn=%s\n' "$FLASH_ATTN"
+  printf 'prompt_chars=%s\n' "$PROMPT_CHARS"
+  printf 'model_token_bytes=%s\n' "$MODEL_TOKEN_BYTES"
+  printf 'spread_threads=%s\n' "$SPREAD_THREADS"
+  printf 'spread_ngl=%s\n' "$SPREAD_NGL"
   printf 'threads_list=%s\n' "$THREADS_LIST"
   printf 'ngl_list=%s\n' "$NGL_LIST"
   printf 'uname=%s\n' "$(uname -a)"
@@ -44,7 +54,7 @@ export LD_LIBRARY_PATH="$BIN_DIR${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
 printf '%s\n' "$?" > "$OUT_DIR/list-devices.exit"
 
 summary="$OUT_DIR/summary.tsv"
-printf 'phase\tthreads\tthreads_batch\tngl\tdevice\tprompt_tokens\tgen_tokens\trepeat\tbatch\tubatch\tflash_attn\trc\tseconds\toutput\n' > "$summary"
+printf 'phase\tthreads\tthreads_batch\tngl\tdevice\tprompt_tokens\tgen_tokens\ttotal_tokens\tprompt_chars\tmodel_token_bytes\trepeat\tbatch\tubatch\tflash_attn\trc\tseconds\toutput\n' > "$summary"
 
 run_one() {
   phase="$1"
@@ -58,6 +68,9 @@ run_one() {
   batch="$9"
   ubatch="${10}"
   fa="${11}"
+  prompt_chars="${12}"
+  model_token_bytes="${13}"
+  total_tokens="$((prompt + gen))"
 
   safe_dev="$(printf '%s' "$dev" | tr -c 'A-Za-z0-9_' '_')"
   name="${phase}_t${threads}_tb${threads_batch}_ngl${ngl}_${safe_dev}_p${prompt}_n${gen}_b${batch}_ub${ubatch}_fa${fa}"
@@ -97,19 +110,27 @@ run_one() {
   rc="$?"
   end="$(date +%s)"
   seconds="$((end - start))"
-  printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
-    "$phase" "$threads" "$threads_batch" "$ngl" "$dev" "$prompt" "$gen" "$repeat" "$batch" "$ubatch" "$fa" "$rc" "$seconds" "$out" >> "$summary"
+  printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' \
+    "$phase" "$threads" "$threads_batch" "$ngl" "$dev" "$prompt" "$gen" "$total_tokens" "$prompt_chars" "$model_token_bytes" "$repeat" "$batch" "$ubatch" "$fa" "$rc" "$seconds" "$out" >> "$summary"
 }
 
-for ngl in $NGL_LIST; do
-  for threads in $THREADS_LIST; do
-    if [ "$ngl" = "0" ]; then
-      dev="none"
-    else
-      dev="Vulkan0"
-    fi
-    run_one decode "$threads" "$threads" "$ngl" "$dev" "$PROMPT_TOKENS" "$GEN_TOKENS" "$REPEAT" "$BATCH_SIZE" "$UBATCH_SIZE" "$FLASH_ATTN"
+if [ -n "$BATCH_UBATCH_SPREAD" ]; then
+  for pair in $BATCH_UBATCH_SPREAD; do
+    batch="${pair%%:*}"
+    ubatch="${pair#*:}"
+    run_one spread "$SPREAD_THREADS" "$SPREAD_THREADS" "$SPREAD_NGL" Vulkan0 "$PROMPT_TOKENS" "$GEN_TOKENS" "$REPEAT" "$batch" "$ubatch" "$FLASH_ATTN" "$PROMPT_CHARS" "$MODEL_TOKEN_BYTES"
   done
-done
+else
+  for ngl in $NGL_LIST; do
+    for threads in $THREADS_LIST; do
+      if [ "$ngl" = "0" ]; then
+        dev="none"
+      else
+        dev="Vulkan0"
+      fi
+      run_one decode "$threads" "$threads" "$ngl" "$dev" "$PROMPT_TOKENS" "$GEN_TOKENS" "$REPEAT" "$BATCH_SIZE" "$UBATCH_SIZE" "$FLASH_ATTN" "$PROMPT_CHARS" "$MODEL_TOKEN_BYTES"
+    done
+  done
+fi
 
 printf 'DONE %s\n' "$OUT_DIR" > "$OUT_DIR/DONE"
