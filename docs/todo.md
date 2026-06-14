@@ -80,6 +80,22 @@ Evidence:
 
 ## Active Focus
 
+### 1.2. Publishable Gemma 4 E2B tuning dataset
+
+The next benchmark plan is captured in:
+
+[mali-g715-gemma4-e2b-q4km-next-sweeps-2026-06-14.md](benchmarks/mali-g715-gemma4-e2b-q4km-next-sweeps-2026-06-14.md)
+
+Minimum dataset before publishing:
+
+- context sweep: `2048`, `4096`, `6144`, `8192`;
+- larger-batch sweep: `512/64`, `768/64`, `1024/64`;
+- microbatch-near-64 sweep: `512/48`, `512/64`, `512/80`, `512/96`;
+- server-session sweep with short, medium, long, and follow-up generations;
+- thermal and power-state notes for every run;
+- prompt/tool-overhead comparison;
+- final recommended profile and conservative fallback profile.
+
 ### Current local model paths
 
 Larger models are stored under top-level Termux `~/models`:
