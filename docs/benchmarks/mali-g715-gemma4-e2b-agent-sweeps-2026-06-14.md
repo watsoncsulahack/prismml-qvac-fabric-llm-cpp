@@ -17,7 +17,7 @@ Comparison models:
 
 ```text
 /data/data/com.termux/files/home/qvac/gemma-4-E2B-it-Q4_K_M.gguf
-/data/data/com.termux/files/home/Ternary-Bonsai-1.7B-Q2_0.gguf
+/data/data/com.termux/files/home/models/Ternary-Bonsai-1.7B-Q2_0.gguf
 ```
 
 The current best measured synthetic profile is:
@@ -93,7 +93,7 @@ exceeds practical runtime:
 | --- | --- | --- |
 | Primary | Gemma 4 E2B `UD-Q4_K_XL` | `/data/data/com.termux/files/home/models/gemma-4-E2B-it-qat-UD-Q4_K_XL.gguf` |
 | Comparison | Gemma 4 E2B `Q4_K_M` | `/data/data/com.termux/files/home/qvac/gemma-4-E2B-it-Q4_K_M.gguf` |
-| Baseline | Ternary-Bonsai 1.7B `Q2_0` | `/data/data/com.termux/files/home/Ternary-Bonsai-1.7B-Q2_0.gguf` |
+| Baseline | Ternary-Bonsai 1.7B `Q2_0` | `/data/data/com.termux/files/home/models/Ternary-Bonsai-1.7B-Q2_0.gguf` |
 
 Keep `-t 2` for all of these sweeps. Thread count is not part of the next
 measurement round.

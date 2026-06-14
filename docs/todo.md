@@ -96,7 +96,7 @@ Comparison models:
 
 ```text
 /data/data/com.termux/files/home/qvac/gemma-4-E2B-it-Q4_K_M.gguf
-/data/data/com.termux/files/home/Ternary-Bonsai-1.7B-Q2_0.gguf
+/data/data/com.termux/files/home/models/Ternary-Bonsai-1.7B-Q2_0.gguf
 ```
 
 Minimum dataset before publishing:
@@ -112,6 +112,9 @@ Minimum dataset before publishing:
 - PrismML versus QVAC/Fabric runtime comparison when the QVAC int-dot artifact
   is available;
 - final recommended profile and conservative fallback profile.
+
+Initial raw synthetic sweep:
+[mali-g715-gemma-agent-raw-sweep-2026-06-14.md](benchmarks/mali-g715-gemma-agent-raw-sweep-2026-06-14.md)
 
 ### Current local model paths
 
