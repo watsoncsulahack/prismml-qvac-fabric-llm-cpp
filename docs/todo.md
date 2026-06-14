@@ -65,11 +65,19 @@ Evidence:
 
 - Report:
   [mali-g715-gemma4-e2b-q4km-batch-spread-2026-06-14.md](benchmarks/mali-g715-gemma4-e2b-q4km-batch-spread-2026-06-14.md)
-- Best measured row: `-ngl 99 -t 2 -fa 0 -b 256 -ub 64`
-- Result: `31.36` PP tok/s, `7.34` TG tok/s, `71s` wall time
-- Interpretation: for Gemma 4 E2B, `256/64` is a better interactive default
-  than `128/64` because prompt-processing is similar but decode is materially
-  faster.
+- Best measured row: `-ngl 99 -t 2 -fa 0 -b 512 -ub 64`
+- Result: `32.41` PP tok/s, `7.93` TG tok/s, `65s` wall time
+- Interpretation: for Gemma 4 E2B, `512/64` is the current best interactive
+  default. `512/128` regressed to `8.24` PP tok/s, `6.51` TG tok/s, and `206s`
+  wall time, so larger logical batch helped while larger microbatch hurt.
+- Targeted follow-up: `-t 1`, `-t 4`, flash attention, and q4 KV did not beat
+  `-t 2 --flash-attn off` with f16 KV. q4 KV failed to create context in the
+  `512/64` row.
+- QVAC/Fabric assessment: the local checkout and available Android server
+  binaries are stale for this Gemma path; the tested QVAC server reports
+  `int dot: 0` on Mali-G715, while the current PrismML artifact reports
+  `int dot: 1`. Treat QVAC as a source of tuning ideas, not the primary Gemma
+  runtime until it is rebased and benchmarked.
 
 ## Active Focus
 
