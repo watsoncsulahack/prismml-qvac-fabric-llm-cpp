@@ -116,6 +116,19 @@ Minimum dataset before publishing:
 Initial raw synthetic sweep:
 [mali-g715-gemma-agent-raw-sweep-2026-06-14.md](benchmarks/mali-g715-gemma-agent-raw-sweep-2026-06-14.md)
 
+Next phase after the raw sweep:
+[mali-g715-gemma-agent-next-phase-2026-06-15.md](benchmarks/mali-g715-gemma-agent-next-phase-2026-06-15.md)
+
+Immediate next rows:
+
+- primary XL `768` and `1024` logical batches with smaller microbatches
+  `16`, `24`, `32`, `48`, and `64`;
+- KV cache follow-up that explains `-ctk` and `-ctv`, confirms that this build
+  has no f8 KV type, and retests q8/q8 with `-fa 1` because quantized V cache
+  requires flash attention;
+- server-session confirmation only after the synthetic follow-up narrows the
+  profile.
+
 ### Current local model paths
 
 Larger models are stored under top-level Termux `~/models`:

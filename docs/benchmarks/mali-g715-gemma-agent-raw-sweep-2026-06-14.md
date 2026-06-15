@@ -141,16 +141,17 @@ Shape:
 -p 0 -n 128 -d 4096 -b 512 -ub 64
 ```
 
-| Model | f16/f16 TG | q8/q8 | q8 key / f16 value TG |
+| Model | f16/f16 TG | q8/q8 with `-fa 0` | q8 key / f16 value TG |
 | --- | ---: | --- | ---: |
 | `primary_xl` | 8.34 | failed to create context | 7.25 |
 | `q4km` | 7.28 | failed to create context | 6.76 |
 | `bonsai1p7b` | 12.31 | failed to create context | aborted after 623s |
 
-Full q8 KV is not viable in this build/configuration. q8 key with f16 value
-works for both Gemma models, but it is slower than f16/f16 in the first raw
-pass. It is not a speed optimization candidate yet; it is only worth revisiting
-if memory pressure at larger contexts becomes the dominant blocker.
+Full q8 KV is not viable in this exact `-fa 0` configuration because quantized
+V-cache requires flash attention in the current source tree. q8 key with f16
+value works for both Gemma models with flash attention off, but it is slower
+than f16/f16 in the first raw pass. The next KV follow-up should test q8/q8
+with `-fa 1` before treating it as unsupported on this device.
 
 ## First Conclusions
 
@@ -164,8 +165,9 @@ if memory pressure at larger contexts becomes the dominant blocker.
 - `-c 4096` remains the conservative default. `8192` is viable for quality
   experiments, but the raw context-depth rows show lower decode headroom and
   much longer measurement wall time.
-- q8/q8 KV should be treated as unsupported for this runtime/model set until
-  proven otherwise.
+- q8/q8 KV should be treated as untested under its required flash-attention
+  configuration. The failed raw row used `-fa 0`, which cannot support a
+  quantized V cache in this source tree.
 - q8 key / f16 value is not faster than f16/f16 on the Gemma models, so it is
   not a current speed path.
 
