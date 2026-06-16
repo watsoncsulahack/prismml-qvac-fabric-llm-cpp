@@ -60,6 +60,13 @@ final repeatable publication set.
 | `q4km` | Gemma 4 E2B `Q4_K_M` | `/data/data/com.termux/files/home/qvac/gemma-4-E2B-it-Q4_K_M.gguf` |
 | `bonsai1p7b` | Ternary-Bonsai 1.7B `Q2_0` | `/data/data/com.termux/files/home/models/Ternary-Bonsai-1.7B-Q2_0.gguf` |
 
+New follow-up models added after this raw pass:
+
+| Label | Model | Path | Follow-up status |
+| --- | --- | --- | --- |
+| `bonsai4b` | Ternary-Bonsai 4B `Q2_0` | `/data/data/com.termux/files/home/models/Ternary-Bonsai-4B-Q2_0.gguf` | queued for next-phase sweep |
+| `bonsai8b` | Ternary-Bonsai 8B `Q2_0` | `/data/data/com.termux/files/home/models/Ternary-Bonsai-8B-Q2_0.gguf` | queued, with server-crash risk noted |
+
 All rows used full Vulkan offload, `-t 2`, `-fa 0`, and `-r 1`.
 
 ## Baseline

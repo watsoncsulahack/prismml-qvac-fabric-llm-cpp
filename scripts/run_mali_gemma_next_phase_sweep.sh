@@ -10,7 +10,8 @@ DEVICE="${DEVICE:-Vulkan0}"
 REPEAT="${REPEAT:-1}"
 PHASE_TIMEOUT="${PHASE_TIMEOUT:-1800}"
 
-MODEL_SET="${MODEL_SET:-primary_xl:/data/data/com.termux/files/home/models/gemma-4-E2B-it-qat-UD-Q4_K_XL.gguf}"
+MODEL_SET="${MODEL_SET:-primary_xl:/data/data/com.termux/files/home/models/gemma-4-E2B-it-qat-UD-Q4_K_XL.gguf q4km:/data/data/com.termux/files/home/qvac/gemma-4-E2B-it-Q4_K_M.gguf bonsai1p7b:/data/data/com.termux/files/home/models/Ternary-Bonsai-1.7B-Q2_0.gguf bonsai4b:/data/data/com.termux/files/home/models/Ternary-Bonsai-4B-Q2_0.gguf bonsai8b:/data/data/com.termux/files/home/models/Ternary-Bonsai-8B-Q2_0.gguf}"
+PHASES="${PHASES:-baseline small_ubatch kv}"
 
 mkdir -p "$OUT_DIR/raw"
 export LD_LIBRARY_PATH="$BIN_DIR${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
@@ -23,6 +24,7 @@ export LD_LIBRARY_PATH="$BIN_DIR${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
   printf 'ngl=%s\n' "$NGL"
   printf 'device=%s\n' "$DEVICE"
   printf 'repeat=%s\n' "$REPEAT"
+  printf 'phases=%s\n' "$PHASES"
   printf 'phase_timeout=%s\n' "$PHASE_TIMEOUT"
   printf 'model_set=%s\n' "$MODEL_SET"
   printf 'uname=%s\n' "$(uname -a)"
@@ -80,30 +82,49 @@ run_phase() {
   printf '[%s] phase=%s model=%s rc=%s seconds=%s output=%s\n' "$(date -u +%H:%M:%S)" "$phase" "$label" "$rc" "$seconds" "$out"
 }
 
+has_phase() {
+  case " $PHASES " in
+    *" $1 "*) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
 for item in $MODEL_SET; do
   label="${item%%:*}"
   model="${item#*:}"
 
-  run_phase batch768_small_ubatch "$label" "$model" \
-    -p 512 -n 32 -d 0 -b 768 -ub 16,24,32,48,64 -fa 0 -ctk f16 -ctv f16
+  if has_phase baseline; then
+    run_phase baseline_512_64 "$label" "$model" \
+      -p 512 -n 32 -d 0 -b 512 -ub 64 -fa 0 -ctk f16 -ctv f16
 
-  run_phase batch1024_small_ubatch "$label" "$model" \
-    -p 512 -n 32 -d 0 -b 1024 -ub 16,24,32,48,64 -fa 0 -ctk f16 -ctv f16
+    run_phase candidate_768_64 "$label" "$model" \
+      -p 512 -n 32 -d 0 -b 768 -ub 64 -fa 0 -ctk f16 -ctv f16
+  fi
 
-  run_phase kv_f16_fa0 "$label" "$model" \
-    -p 0 -n 128 -d 4096 -b 768 -ub 64 -fa 0 -ctk f16 -ctv f16
+  if has_phase small_ubatch; then
+    run_phase batch768_small_ubatch "$label" "$model" \
+      -p 512 -n 32 -d 0 -b 768 -ub 16,24,32,48,64 -fa 0 -ctk f16 -ctv f16
 
-  run_phase kv_f16_fa1 "$label" "$model" \
-    -p 0 -n 128 -d 4096 -b 768 -ub 64 -fa 1 -ctk f16 -ctv f16
+    run_phase batch1024_small_ubatch "$label" "$model" \
+      -p 512 -n 32 -d 0 -b 1024 -ub 16,24,32,48,64 -fa 0 -ctk f16 -ctv f16
+  fi
 
-  run_phase kv_q8q8_fa1 "$label" "$model" \
-    -p 0 -n 128 -d 4096 -b 768 -ub 64 -fa 1 -ctk q8_0 -ctv q8_0
+  if has_phase kv; then
+    run_phase kv_f16_fa0 "$label" "$model" \
+      -p 0 -n 128 -d 4096 -b 768 -ub 64 -fa 0 -ctk f16 -ctv f16
 
-  run_phase kv_q8k_f16v_fa0 "$label" "$model" \
-    -p 0 -n 128 -d 4096 -b 768 -ub 64 -fa 0 -ctk q8_0 -ctv f16
+    run_phase kv_f16_fa1 "$label" "$model" \
+      -p 0 -n 128 -d 4096 -b 768 -ub 64 -fa 1 -ctk f16 -ctv f16
 
-  run_phase kv_q8k_f16v_fa1 "$label" "$model" \
-    -p 0 -n 128 -d 4096 -b 768 -ub 64 -fa 1 -ctk q8_0 -ctv f16
+    run_phase kv_q8q8_fa1 "$label" "$model" \
+      -p 0 -n 128 -d 4096 -b 768 -ub 64 -fa 1 -ctk q8_0 -ctv q8_0
+
+    run_phase kv_q8k_f16v_fa0 "$label" "$model" \
+      -p 0 -n 128 -d 4096 -b 768 -ub 64 -fa 0 -ctk q8_0 -ctv f16
+
+    run_phase kv_q8k_f16v_fa1 "$label" "$model" \
+      -p 0 -n 128 -d 4096 -b 768 -ub 64 -fa 1 -ctk q8_0 -ctv f16
+  fi
 done
 
 command -v termux-battery-status >/dev/null 2>&1 && {

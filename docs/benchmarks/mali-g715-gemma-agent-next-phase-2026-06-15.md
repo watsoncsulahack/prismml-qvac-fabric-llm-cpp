@@ -6,7 +6,9 @@ This is the follow-up plan after the first raw grouped sweep in
 `mali-g715-gemma-agent-raw-sweep-2026-06-14.md`.
 
 The goal is to tighten the profile around the primary Gemma 4 E2B
-`UD-Q4_K_XL` model before spending more time on longer server-session tests.
+`UD-Q4_K_XL` model, then compare it against the Gemma `Q4_K_M` candidate and
+the Ternary-Bonsai size ladder before spending more time on longer
+server-session tests.
 
 ## Current Baseline
 
@@ -35,6 +37,24 @@ The first raw sweep found:
 - `ub=80` and `ub=96` badly hurt prompt processing.
 - `4096` context remains the practical default.
 - `8192` context is viable but slower.
+
+## Model Set
+
+The LFM2 8B A1B model is intentionally out of this round. It should be tested
+later as a separate MoE comparison.
+
+| Label | Family | Size class | Quant | Approx file size | Path | Status |
+| --- | --- | ---: | --- | ---: | --- | --- |
+| `primary_xl` | Gemma 4 E2B | 4.6B params | `UD-Q4_K_XL` | ~2.6 GB | `/data/data/com.termux/files/home/models/gemma-4-E2B-it-qat-UD-Q4_K_XL.gguf` | primary |
+| `q4km` | Gemma 4 E2B | 4.6B params | `Q4_K_M` | pending | `/data/data/com.termux/files/home/qvac/gemma-4-E2B-it-Q4_K_M.gguf` | comparison |
+| `bonsai1p7b` | Ternary-Bonsai | 1.7B params | `Q2_0` | pending | `/data/data/com.termux/files/home/models/Ternary-Bonsai-1.7B-Q2_0.gguf` | speed/quality baseline |
+| `bonsai4b` | Ternary-Bonsai | 4B params | `Q2_0` | ~1 GB | `/data/data/com.termux/files/home/models/Ternary-Bonsai-4B-Q2_0.gguf` | likely best Bonsai candidate |
+| `bonsai8b` | Ternary-Bonsai | 8B params | `Q2_0` | pending | `/data/data/com.termux/files/home/models/Ternary-Bonsai-8B-Q2_0.gguf` | crash-risk candidate |
+
+For GitHub readability, benchmark results should prefer narrow, row-oriented
+tables instead of very wide matrices. The durable analytics artifact should be
+the flat CSV/TSV/ODS export, where each result row contains one model, one
+phase, one batch shape, one KV setting, and one measured throughput.
 
 ## What `ctk` And `ctv` Mean
 
@@ -99,7 +119,10 @@ Interpretation:
 - If all smaller microbatches lose badly, keep `768/64` as the main profile
   and stop spending time below `ub=64`.
 
-Only repeat the winning rows on Q4_K_M and Bonsai after the primary XL pass.
+Repeat the full next-phase synthetic pass across the five-model set where
+practical. If the 8B Bonsai model crashes `llama-server`, keep the failure row
+in the data instead of hiding it; crash behavior is part of the day-to-day
+viability comparison.
 
 ## Phase 2: KV Cache Compatibility And Speed
 
@@ -176,5 +199,21 @@ The synthetic follow-up rows are captured in:
 scripts/run_mali_gemma_next_phase_sweep.sh
 ```
 
-Run the primary-only pass first. Expand to comparison models after the profile
-choice is narrower.
+The default `MODEL_SET` includes Gemma XL, Gemma Q4_K_M, Bonsai 1.7B, Bonsai
+4B, and Bonsai 8B. Override `MODEL_SET` only for targeted reruns.
+
+Flatten raw JSON artifacts into analytics-friendly files with:
+
+```text
+scripts/flatten_llama_bench_sweep.py OUT_DIR/summary.tsv --out-prefix docs/benchmarks/artifacts/<run-name>-flat
+```
+
+This writes:
+
+```text
+<run-name>-flat.csv
+<run-name>-flat.tsv
+<run-name>-flat.ods
+```
+
+Use CSV/TSV for scripts and data frames, and ODS for spreadsheet inspection.

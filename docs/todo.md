@@ -97,7 +97,13 @@ Comparison models:
 ```text
 /data/data/com.termux/files/home/qvac/gemma-4-E2B-it-Q4_K_M.gguf
 /data/data/com.termux/files/home/models/Ternary-Bonsai-1.7B-Q2_0.gguf
+/data/data/com.termux/files/home/models/Ternary-Bonsai-4B-Q2_0.gguf
+/data/data/com.termux/files/home/models/Ternary-Bonsai-8B-Q2_0.gguf
 ```
+
+Hold `/data/data/com.termux/files/home/models/LFM2-8B-A1B-Q4_0.gguf` for a
+later MoE-specific comparison rather than mixing it into this Gemma/Bonsai
+round.
 
 Minimum dataset before publishing:
 
@@ -116,6 +122,9 @@ Minimum dataset before publishing:
 Initial raw synthetic sweep:
 [mali-g715-gemma-agent-raw-sweep-2026-06-14.md](benchmarks/mali-g715-gemma-agent-raw-sweep-2026-06-14.md)
 
+Five-model Gemma/Bonsai baseline:
+[mali-g715-gemma-bonsai-baseline-2026-06-16.md](benchmarks/mali-g715-gemma-bonsai-baseline-2026-06-16.md)
+
 Next phase after the raw sweep:
 [mali-g715-gemma-agent-next-phase-2026-06-15.md](benchmarks/mali-g715-gemma-agent-next-phase-2026-06-15.md)
 
@@ -123,9 +132,12 @@ Immediate next rows:
 
 - primary XL `768` and `1024` logical batches with smaller microbatches
   `16`, `24`, `32`, `48`, and `64`;
+- five-model comparison across Gemma XL, Gemma Q4_K_M, Bonsai 1.7B, Bonsai 4B,
+  and Bonsai 8B where rows complete;
 - KV cache follow-up that explains `-ctk` and `-ctv`, confirms that this build
   has no f8 KV type, and retests q8/q8 with `-fa 1` because quantized V cache
   requires flash attention;
+- flat CSV/TSV plus ODS exports for analytics-friendly benchmark review;
 - server-session confirmation only after the synthetic follow-up narrows the
   profile.
 
