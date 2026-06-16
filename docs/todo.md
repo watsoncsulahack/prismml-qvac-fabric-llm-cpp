@@ -128,6 +128,9 @@ Five-model Gemma/Bonsai baseline:
 Corrected q8/q8 KV follow-up:
 [mali-g715-q8q8-kv-fa1-2026-06-16.md](benchmarks/mali-g715-q8q8-kv-fa1-2026-06-16.md)
 
+Context metadata and first LFM2 8B A1B profile:
+[mali-g715-context-metadata-lfm2-prelim-2026-06-16.md](benchmarks/mali-g715-context-metadata-lfm2-prelim-2026-06-16.md)
+
 Next phase after the raw sweep:
 [mali-g715-gemma-agent-next-phase-2026-06-15.md](benchmarks/mali-g715-gemma-agent-next-phase-2026-06-15.md)
 
@@ -141,6 +144,8 @@ Immediate next rows:
   has no f8 KV type, and retests q8/q8 with `-fa 1` because quantized V cache
   requires flash attention;
 - flat CSV/TSV plus ODS exports for analytics-friendly benchmark review;
+- record each model's advertised GGUF context length and each run's actual
+  `llama-bench -d` depth or server `-c` context;
 - server-session confirmation only after the synthetic follow-up narrows the
   profile.
 
@@ -154,7 +159,9 @@ Larger models are stored under top-level Termux `~/models`:
 /data/data/com.termux/files/home/models/LFM2-8B-A1B-Q4_0.gguf
 ```
 
-Finish Bonsai sweep validation before moving to the LFM2 8B A1B MoE benchmark.
+The first LFM2 8B A1B MoE profile completed at `-b 512 -ub 64` with a 4k
+context/depth row. Follow up with server-load and qualitative agent checks
+before promoting it into the main comparison.
 
 ### 2. Build lightweight Vulkan profiling for Bonsai `Q2_0`
 

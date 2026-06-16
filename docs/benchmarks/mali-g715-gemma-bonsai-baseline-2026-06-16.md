@@ -18,6 +18,7 @@ Committed analytics exports:
 docs/benchmarks/artifacts/mali-g715-gemma-next-phase-baseline-20260616T014804Z-flat.csv
 docs/benchmarks/artifacts/mali-g715-gemma-next-phase-baseline-20260616T014804Z-flat.tsv
 docs/benchmarks/artifacts/mali-g715-gemma-next-phase-baseline-20260616T014804Z-flat.ods
+docs/benchmarks/artifacts/mali-g715-gemma-next-phase-baseline-20260616T014804Z-summary.tsv
 ```
 
 ## Runtime
@@ -59,6 +60,11 @@ Shape:
 ```text
 -p 512 -n 32 -d 0 -t 2 -ngl 99 -fa 0 -ctk f16 -ctv f16
 ```
+
+Context note: this baseline did not prefill a long synthetic context
+(`-d 0`). The active work rows are prompt processing at 512 tokens and token
+generation at 32 tokens. Server `-c/--ctx-size` was not part of this
+`llama-bench` run.
 
 This table is intentionally narrow and row-oriented for GitHub scrolling. Use
 the CSV/TSV/ODS artifacts for filtering, pivoting, and plotting.

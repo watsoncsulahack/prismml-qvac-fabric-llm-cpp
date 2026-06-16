@@ -9,6 +9,7 @@ NGL="${NGL:-99}"
 DEVICE="${DEVICE:-Vulkan0}"
 REPEAT="${REPEAT:-1}"
 PHASE_TIMEOUT="${PHASE_TIMEOUT:-1800}"
+SERVER_CTX_SIZE="${SERVER_CTX_SIZE:-}"
 
 MODEL_SET="${MODEL_SET:-primary_xl:/data/data/com.termux/files/home/models/gemma-4-E2B-it-qat-UD-Q4_K_XL.gguf q4km:/data/data/com.termux/files/home/qvac/gemma-4-E2B-it-Q4_K_M.gguf bonsai1p7b:/data/data/com.termux/files/home/models/Ternary-Bonsai-1.7B-Q2_0.gguf bonsai4b:/data/data/com.termux/files/home/models/Ternary-Bonsai-4B-Q2_0.gguf bonsai8b:/data/data/com.termux/files/home/models/Ternary-Bonsai-8B-Q2_0.gguf}"
 PHASES="${PHASES:-baseline small_ubatch kv}"
@@ -24,6 +25,7 @@ export LD_LIBRARY_PATH="$BIN_DIR${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
   printf 'ngl=%s\n' "$NGL"
   printf 'device=%s\n' "$DEVICE"
   printf 'repeat=%s\n' "$REPEAT"
+  printf 'server_ctx_size=%s\n' "$SERVER_CTX_SIZE"
   printf 'phases=%s\n' "$PHASES"
   printf 'phase_timeout=%s\n' "$PHASE_TIMEOUT"
   printf 'model_set=%s\n' "$MODEL_SET"
@@ -42,7 +44,7 @@ export LD_LIBRARY_PATH="$BIN_DIR${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
 printf '%s\n' "$?" > "$OUT_DIR/list-devices.exit"
 
 summary="$OUT_DIR/summary.tsv"
-printf 'phase\tmodel_label\tmodel\trc\tseconds\toutput\tcommand\n' > "$summary"
+printf 'phase\tmodel_label\tmodel\trc\tseconds\toutput\tserver_ctx_size\tcommand\n' > "$summary"
 
 run_phase() {
   phase="$1"
@@ -76,7 +78,7 @@ run_phase() {
 
   end="$(date +%s)"
   seconds="$((end - start))"
-  printf '%s\t%s\t%s\t%s\t%s\t%s\t' "$phase" "$label" "$model" "$rc" "$seconds" "$out" >> "$summary"
+  printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\t' "$phase" "$label" "$model" "$rc" "$seconds" "$out" "$SERVER_CTX_SIZE" >> "$summary"
   printf '%q ' "$BIN_DIR/llama-bench" -m "$model" -dev "$DEVICE" -ngl "$NGL" -t "$THREADS" -r "$REPEAT" --no-warmup "$@" -o json >> "$summary"
   printf '\n' >> "$summary"
   printf '[%s] phase=%s model=%s rc=%s seconds=%s output=%s\n' "$(date -u +%H:%M:%S)" "$phase" "$label" "$rc" "$seconds" "$out"

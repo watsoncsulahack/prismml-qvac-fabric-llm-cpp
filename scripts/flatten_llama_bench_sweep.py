@@ -39,6 +39,9 @@ FIELDS = [
     "n_prompt",
     "n_gen",
     "n_depth",
+    "benchmark_context_tokens",
+    "benchmark_work_tokens",
+    "server_ctx_size",
     "avg_ts",
     "stddev_ts",
     "avg_ns",
@@ -51,6 +54,25 @@ FIELDS = [
 def read_summary(summary_path: Path) -> list[dict[str, str]]:
     with summary_path.open(newline="") as f:
         return list(csv.DictReader(f, delimiter="\t"))
+
+
+def int_value(value: object) -> int:
+    try:
+        return int(str(value))
+    except (TypeError, ValueError):
+        return 0
+
+
+def add_context_columns(row: dict[str, object], summary: dict[str, str]) -> None:
+    n_prompt = int_value(row.get("n_prompt"))
+    n_gen = int_value(row.get("n_gen"))
+    n_depth = int_value(row.get("n_depth"))
+
+    row["benchmark_context_tokens"] = n_depth if n_depth > 0 else n_prompt + n_gen
+    row["benchmark_work_tokens"] = n_prompt + n_gen
+    row["server_ctx_size"] = summary.get("server_ctx_size", "")
+    if "command" in row:
+        row["command"] = str(row["command"]).rstrip()
 
 
 def flatten(summary_path: Path) -> list[dict[str, object]]:
@@ -68,14 +90,17 @@ def flatten(summary_path: Path) -> list[dict[str, object]]:
         output = summary.get("output", "")
         path = Path(output) if output else None
         if not path or not path.exists():
+            add_context_columns(base, summary)
             rows.append(base)
             continue
         try:
             records = json.loads(path.read_text())
         except json.JSONDecodeError:
+            add_context_columns(base, summary)
             rows.append(base)
             continue
         if not isinstance(records, list):
+            add_context_columns(base, summary)
             rows.append(base)
             continue
         for record in records:
@@ -85,6 +110,7 @@ def flatten(summary_path: Path) -> list[dict[str, object]]:
             for field in FIELDS:
                 if field in record:
                     row[field] = record[field]
+            add_context_columns(row, summary)
             rows.append(row)
     return rows
 
@@ -92,7 +118,7 @@ def flatten(summary_path: Path) -> list[dict[str, object]]:
 def write_delimited(path: Path, rows: list[dict[str, object]], delimiter: str) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", newline="") as f:
-        writer = csv.DictWriter(f, fieldnames=FIELDS, delimiter=delimiter)
+        writer = csv.DictWriter(f, fieldnames=FIELDS, delimiter=delimiter, lineterminator="\n")
         writer.writeheader()
         for row in rows:
             writer.writerow({field: row.get(field, "") for field in FIELDS})
