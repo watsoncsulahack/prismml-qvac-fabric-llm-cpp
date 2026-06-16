@@ -125,6 +125,9 @@ Initial raw synthetic sweep:
 Five-model Gemma/Bonsai baseline:
 [mali-g715-gemma-bonsai-baseline-2026-06-16.md](benchmarks/mali-g715-gemma-bonsai-baseline-2026-06-16.md)
 
+Corrected q8/q8 KV follow-up:
+[mali-g715-q8q8-kv-fa1-2026-06-16.md](benchmarks/mali-g715-q8q8-kv-fa1-2026-06-16.md)
+
 Next phase after the raw sweep:
 [mali-g715-gemma-agent-next-phase-2026-06-15.md](benchmarks/mali-g715-gemma-agent-next-phase-2026-06-15.md)
 
