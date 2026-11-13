@@ -87,7 +87,7 @@ jobs:
             -DANDROID_STL=c++_shared \
             -DVulkan_GLSLC_EXECUTABLE="$LUNARG_VULKAN_SDK/bin/glslc" \
             -DGGML_NATIVE=OFF \
-            -DGGML_CPU_ARM_ARCH=armv8.5-a+fp16+i8mm \
+            -DGGML_CPU_ARM_ARCH=armv8.2-a+fp16 \
             -DGGML_VULKAN=ON \
             -DGGML_OPENMP=OFF \
             -DLLAMA_CURL=OFF \
